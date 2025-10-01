@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.alexanderl.mmcs_schedule"
-    compileSdk = 36
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.alexanderl.mmcs_schedule"
@@ -29,11 +29,10 @@ android {
 }
 
 dependencies {
-
+    implementation("org.apache.commons:commons-lang3:3.19.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation ("com.google.code.gson:gson:2.13.2")
-    implementation ("org.apache.commons:commons-lang3:3.14.0")
-    implementation ("androidx.annotation:annotation:1.1.0")
+    implementation("androidx.annotation:annotation:1.9.1")
     implementation("com.google.android.material:material:1.13.0")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     testImplementation("junit:junit:4.13.2")

@@ -1,6 +1,6 @@
 package com.alexanderl.mmcs_schedule.API.primitives;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
