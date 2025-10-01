@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.alexanderl.mmcs_schedule.adapters.LessonAdapter;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.DayOfWeek;
 
 public class DayOfWeekView extends Fragment {
@@ -46,7 +47,7 @@ public class DayOfWeekView extends Fragment {
     {
         View view = inflater.inflate(R.layout.day_of_week, container, false);
         TextView dayTextView = view.findViewById(R.id.dayTag);
-        TextView scheduleTextView = view.findViewById(R.id.scheduleTextView);
+       // TextView scheduleTextView = view.findViewById(R.id.scheduleTextView);
         dayTextView.setText(day.getDayname());
         RecyclerView recyclerView = view.findViewById(R.id.list_items);
         LinearLayoutManager l =new LinearLayoutManager(getContext());

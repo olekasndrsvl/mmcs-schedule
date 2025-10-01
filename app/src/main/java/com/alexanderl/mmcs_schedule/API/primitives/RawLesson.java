@@ -21,6 +21,8 @@ public class RawLesson
     @SerializedName("uberid") private   int    uberId   = -1;
     @SerializedName("subcount") private int    subCount = -1;
     @SerializedName("timeslot") private String timeSlot = null;
+    @SerializedName("info") private     String info     = null;
+    @SerializedName("ctype") private    boolean ctype   = false;
 
     public RawLesson(int id, int uberId, int subCount, String timeSlot) {
         this.id = id;
@@ -29,19 +31,10 @@ public class RawLesson
         this.timeSlot = timeSlot;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public int getUberId() {
-        return uberId;
-    }
-
-    public int getSubCount() {
-        return subCount;
-    }
-
-    public String getTimeSlot() {
-        return timeSlot;
-    }
+    public int getId() { return id; }
+    public int getUberId() { return uberId; }
+    public int getSubCount() { return subCount; }
+    public String getTimeSlot() { return timeSlot; }
+    public String getInfo() { return info; }
+    public boolean isCtype() { return ctype; }
 }

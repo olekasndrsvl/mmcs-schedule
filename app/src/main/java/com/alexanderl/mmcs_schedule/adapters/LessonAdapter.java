@@ -1,4 +1,4 @@
-package com.alexanderl.mmcs_schedule;
+package com.alexanderl.mmcs_schedule.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.alexanderl.mmcs_schedule.R;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.Lesson;
 public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.ViewHolder>
 {

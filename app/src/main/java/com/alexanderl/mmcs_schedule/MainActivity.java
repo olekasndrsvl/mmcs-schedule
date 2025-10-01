@@ -2,15 +2,25 @@ package com.alexanderl.mmcs_schedule;
 
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.alexanderl.mmcs_schedule.API.primitives.RawScheduleOfGroup;
+import com.alexanderl.mmcs_schedule.API.primitives.ScheduleService;
+import com.alexanderl.mmcs_schedule.adapters.DayPageAdapter;
+import com.alexanderl.mmcs_schedule.adapters.ScheduleAdapter;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.TestWeekBuilder;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.Week;
+import com.alexanderl.mmcs_schedule.dataTransferObjects.WeekType;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -25,18 +35,52 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initViews();
-        setupViewPager();
+        loadScheduleFromAPI();
+       // setupViewPager();
 
     }
     private void initViews() {
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
     }
+    private void loadScheduleFromAPI() {
+        // Показываем индикатор загрузки
+        //showLoading();
+
+        ScheduleService.getGroupSchedule(53).enqueue(new Callback<RawScheduleOfGroup>() {
+            @Override
+            public void onResponse(Call<RawScheduleOfGroup> call, Response<RawScheduleOfGroup> response) {
+                //hideLoading();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    // Конвертируем raw данные в нашу модель
+                    Week week = ScheduleAdapter.convertToWeek(response.body(), WeekType.COMBINBED);
+                    setupViewPager(week);
+                } else {
+                    // Если API не доступно, используем тестовые данные
+                    useTestData();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RawScheduleOfGroup> call, Throwable t) {
+                //hideLoading();
+                // При ошибке используем тестовые данные
+                useTestData();
+                Toast.makeText(MainActivity.this, "Используются тестовые данные", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 
-    private void setupViewPager() {
+    private void useTestData() {
+        Week testWeek = TestWeekBuilder.createTestWeek();
+        setupViewPager(testWeek);
+    }
 
-        Week w = TestWeekBuilder.createTestWeek();
+    private void setupViewPager(Week w) {
+
+        //w = TestWeekBuilder.createTestWeek();
         // Создаем адаптер
         adapter = new DayPageAdapter(this, w);
         viewPager.setAdapter(adapter);

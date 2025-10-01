@@ -1,9 +1,10 @@
-package com.alexanderl.mmcs_schedule;
+package com.alexanderl.mmcs_schedule.adapters;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import com.alexanderl.mmcs_schedule.DayOfWeekView;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.Week;
 public class DayPageAdapter extends FragmentStateAdapter {
     private final Week week;
