@@ -6,87 +6,26 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
     <LinearLayout
-        android:layout_width="match_parent"
-        android:background="@color/background"
-        android:layout_height="match_parent"
+        android:layout_width="409dp"
+        android:layout_height="729dp"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="1dp"
+        tools:ignore="MissingConstraints"
+        android:background="@color/background">
 
 
-        <LinearLayout
+        <Button
+            android:id="@+id/open_schedule_button"
+            android:onClick="showSheduleButtonClick"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:background="@color/top_foreground"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/cousre"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:textAlignment="center"
-                android:fontFamily="@font/jetbrains_mono_bold"
-                android:textColor="@color/white"
-                android:text="Bach 3.3" />
-
-            <TextView
-                android:id="@+id/CurrentWeek"
-                android:fontFamily="@font/jetbrains_mono_bold"
-                android:textColor="@color/white"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:text="Текущая неделя: \n нижняя" />
-
-            <ImageButton
-                android:id="@+id/imageButton2"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:background="@color/no_color"
-                app:srcCompat="@drawable/change_button_image" />
-
-            <ImageButton
-                android:id="@+id/imageButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-
-                android:background="@color/no_color"
-                app:srcCompat="@drawable/exit_button_image" />
-
-        </LinearLayout>
-
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="0dp">
-
-
-        </androidx.viewpager2.widget.ViewPager2>
+            android:layout_height="wrap_content"
+            android:background="@color/foreground"
+            android:textColor="@color/white"
+            android:layout_margin="15dp"
+            android:fontFamily="@font/jetbrains_mono_bold"
+            android:text="Перейти к расписанию" />
     </LinearLayout>
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:minHeight="70dp"
-        android:background="@color/foreground"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/jetbrains_mono_bold"
-        app:tabTextColor="@color/white"
-        android:foregroundGravity="bottom"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:ignore="MissingConstraints" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

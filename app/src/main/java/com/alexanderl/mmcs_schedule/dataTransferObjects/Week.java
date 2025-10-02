@@ -1,6 +1,8 @@
 package com.alexanderl.mmcs_schedule.dataTransferObjects;
 
-public class Week {
+import java.io.Serializable;
+
+public class Week implements Serializable {
     private WeekType weekType;
     private DayOfWeek[] days;
 
