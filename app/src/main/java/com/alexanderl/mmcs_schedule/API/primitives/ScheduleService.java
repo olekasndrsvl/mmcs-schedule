@@ -20,4 +20,10 @@ public class ScheduleService {
     public static Call<RawScheduleOfGroup> getGroupSchedule(int groupId) {
         return api.getScheduleOfGroup(groupId);
     }
+    public static Call<RawGrade.List> getGrades() {
+        return api.getGrades();
+    }
+    public static Call<RawGroup.List> getGroups(int gradeId) {
+        return api.getGroups(gradeId);
+    }
 }

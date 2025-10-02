@@ -3,6 +3,7 @@
     <style name="Base.Theme.MMCSSCHEDULE" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/foreground</item>
     </style>
 
     <style name="Theme.MMCSSCHEDULE" parent="Base.Theme.MMCSSCHEDULE" />

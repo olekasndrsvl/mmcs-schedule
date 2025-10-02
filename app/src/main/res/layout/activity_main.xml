@@ -6,26 +6,132 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
     <LinearLayout
-        android:layout_width="409dp"
-        android:layout_height="729dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="1dp"
-        tools:ignore="MissingConstraints"
+        android:layout_gravity="bottom"
         android:background="@color/background">
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:fontFamily="@font/jetbrains_mono_bold"
+                android:textSize="12pt"
+                android:gravity="center"
+                android:background="@color/foreground"
+                android:text="Расписание МехМата"
+                android:padding="2pt"
+                android:layout_marginBottom="20dp"
+                />
 
 
-        <Button
-            android:id="@+id/open_schedule_button"
-            android:onClick="showSheduleButtonClick"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/foreground"
-            android:textColor="@color/white"
-            android:layout_margin="15dp"
-            android:fontFamily="@font/jetbrains_mono_bold"
-            android:text="Перейти к расписанию" />
+            android:background="@color/head_color"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="3pt">
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:singleLine="true"
+                android:layout_weight="1"
+                android:fontFamily="@font/jetbrains_mono_bold"
+                android:text="Тип расписания:"
+                android:textColor="@color/white" />
+
+            <Spinner
+                android:id="@+id/spinner_mode"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_gravity="bottom">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@color/content_color"
+                    android:layout_marginHorizontal="3pt">
+
+                    <TextView
+                        android:id="@+id/textView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:singleLine="true"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/jetbrains_mono_bold"
+                        android:text="Направление:"
+                        android:textColor="@color/white" />
+
+                    <Spinner
+                        android:id="@+id/spinner2"
+                        android:layout_width="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+
+                        />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@color/content_color"
+                    android:layout_marginHorizontal="3pt">
+
+                    <TextView
+                        android:id="@+id/textView23"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+
+                        android:layout_weight="1"
+                        android:fontFamily="@font/jetbrains_mono_bold"
+                        android:text="Группа:"
+                        android:singleLine="true"
+                        android:textColor="@color/white" />
+
+                    <Spinner
+                        android:id="@+id/spinner_group"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
+                <Button
+                    android:id="@+id/open_schedule_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="3pt"
+                    android:background="@color/foreground"
+                    android:fontFamily="@font/jetbrains_mono_bold"
+                    android:onClick="showSheduleButtonClick"
+                    android:text="Перейти к расписанию"
+
+                    android:textColor="@color/white" />
+            </LinearLayout>
     </LinearLayout>
+
+
+
+
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
