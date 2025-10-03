@@ -41,7 +41,7 @@ public class ScheduleAdapter {
 
         // Создаем уроки из сгруппированных учебных планов
         Map<Integer, List<Lesson>> lessonsByDay = new HashMap<>();
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 6; i++) {
             lessonsByDay.put(i, new ArrayList<>());
         }
 
@@ -69,10 +69,10 @@ public class ScheduleAdapter {
         }
 
         // Создаем дни недели
-        DayOfWeek[] days = new DayOfWeek[7];
-        String[] dayNames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
+        DayOfWeek[] days = new DayOfWeek[6];
+        String[] dayNames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 6; i++) {
             List<Lesson> dayLessons = lessonsByDay.get(i);
             boolean isDayOff = dayLessons.isEmpty();
             days[i] = new DayOfWeek(dayNames[i], isDayOff, dayLessons.toArray(new Lesson[0]));

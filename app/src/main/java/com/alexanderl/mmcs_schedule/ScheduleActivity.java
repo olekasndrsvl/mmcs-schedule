@@ -32,10 +32,12 @@ public class ScheduleActivity extends AppCompatActivity {
     private ViewPager2 viewPager;
     private TabLayout tabLayout;
     private ImageButton changeWeekButton;
-    private TextView todayTextView;
+    private TextView currentWeekTextView;
+    private TextView groupNameTextView;
     private DayPageAdapter adapter;
     private  RawScheduleOfGroup response_week;
     private WeekType weekType;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,12 +45,16 @@ public class ScheduleActivity extends AppCompatActivity {
         initViews();
         int type_of_schedule=1;
         int group_id=1;
+        String groupName ="<group>";
+
         Bundle arguments = getIntent().getExtras();
         if(arguments!=null) {
              type_of_schedule = arguments.getInt("schedule_type", 1);
              group_id = arguments.getInt("groupid", 1);
+             groupName = arguments.getString("groupname", "FIIT3");
         }
 
+        groupNameTextView.setText(groupName);
 
         getCurrentWeekType();
         loadScheduleFromAPI(group_id);
@@ -66,22 +72,32 @@ public class ScheduleActivity extends AppCompatActivity {
 
                 String temp =menuItem.getTitle().toString();
                 Week week;
+                String wktp;
                 switch (temp)
                 {
                     case "Текущая неделя":
                         week = ScheduleAdapter.convertToWeek(response_week,weekType);
+                        wktp = String.format("Текущая неделя:\n %s", weekType.toString());
+                        currentWeekTextView.setText(wktp);
+
                         setupViewPager(week);
                         break;
                     case "Верхняя неделя":
                         week = ScheduleAdapter.convertToWeek(response_week, WeekType.UPPER);
+                        wktp = String.format("Выбранная неделя:\n %s", WeekType.UPPER.toString());
+                        currentWeekTextView.setText(wktp);
                         setupViewPager(week);
                         break;
                     case "Нижняя неделя":
                         week = ScheduleAdapter.convertToWeek(response_week, WeekType.LOWER);
+                        wktp = String.format("Выбранная неделя:\n %s", WeekType.LOWER.toString());
+                        currentWeekTextView.setText(wktp);
                         setupViewPager(week);
                         break;
                     case "Полная неделя":
                         week = ScheduleAdapter.convertToWeek(response_week, WeekType.COMBINBED);
+                        wktp = String.format("Выбранная неделя:\n %s", WeekType.COMBINBED.toString());
+                        currentWeekTextView.setText(wktp);
                         setupViewPager(week);
                         break;
                 }
@@ -100,6 +116,8 @@ public class ScheduleActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
         changeWeekButton = findViewById(R.id.ChangeWeekButton);
+        currentWeekTextView= findViewById(R.id.CurrentWeek);
+        groupNameTextView = findViewById(R.id.group_name_textview);
     }
 
     private void getCurrentWeekType()
@@ -140,6 +158,8 @@ public class ScheduleActivity extends AppCompatActivity {
 
 
                     Week week1 = ScheduleAdapter.convertToWeek(response_week,weekType);
+                    String wktp = String.format("Текущая неделя:\n %s", weekType.toString());
+                    currentWeekTextView.setText(wktp);
                     setupViewPager(week1);
 
                 } else {
@@ -215,8 +235,6 @@ public class ScheduleActivity extends AppCompatActivity {
                 return "ПТ";
             case 6:
                 return "СБ";
-            case 7:
-                return "ВС";
             default:
                 return "Unknown!";
         }

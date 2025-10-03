@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private List<RawGroup> rawGroups = new ArrayList<>();
 
     private int selectedGroupId;
+    private String selectedGroupName;
     Dictionary<String,Integer> grades_dict = new Hashtable<String, Integer>();
     Dictionary<String,Integer> group_dict = new Hashtable<String, Integer>();
     @Override
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 String item = (String)parent.getItemAtPosition(position);
                 //Toast.makeText(MainActivity.this,"Selected!",Toast.LENGTH_LONG);
                 selectedGroupId = group_dict.get(item);
-
+                selectedGroupName= item;
             }
 
             @Override
@@ -209,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         intent.putExtra("groupid",selectedGroupId); // id: 53 ФИИТ 3.3 расписание
+        intent.putExtra("groupname",selectedGroupName);
         startActivity(intent);
     }
 }
