@@ -26,4 +26,8 @@ public class ScheduleService {
     public static Call<RawGroup.List> getGroups(int gradeId) {
         return api.getGroups(gradeId);
     }
+    public static Call<RawWeek> getWeekType()
+    {
+        return api.getCurrentWeek();
+    }
 }

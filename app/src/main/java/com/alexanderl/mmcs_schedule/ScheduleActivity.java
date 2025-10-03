@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.alexanderl.mmcs_schedule.API.primitives.RawScheduleOfGroup;
+import com.alexanderl.mmcs_schedule.API.primitives.RawWeek;
 import com.alexanderl.mmcs_schedule.API.primitives.ScheduleService;
 import com.alexanderl.mmcs_schedule.adapters.DayPageAdapter;
 import com.alexanderl.mmcs_schedule.adapters.ScheduleAdapter;
@@ -34,6 +35,7 @@ public class ScheduleActivity extends AppCompatActivity {
     private TextView todayTextView;
     private DayPageAdapter adapter;
     private  RawScheduleOfGroup response_week;
+    private WeekType weekType;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,9 +50,9 @@ public class ScheduleActivity extends AppCompatActivity {
         }
 
 
-
+        getCurrentWeekType();
         loadScheduleFromAPI(group_id);
-        //week.weekType=
+
 
         changeWeekButton.setOnClickListener(v -> {
 
@@ -67,7 +69,8 @@ public class ScheduleActivity extends AppCompatActivity {
                 switch (temp)
                 {
                     case "Текущая неделя":
-                        // тут запрос текущей недели
+                        week = ScheduleAdapter.convertToWeek(response_week,weekType);
+                        setupViewPager(week);
                         break;
                     case "Верхняя неделя":
                         week = ScheduleAdapter.convertToWeek(response_week, WeekType.UPPER);
@@ -98,6 +101,29 @@ public class ScheduleActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tabLayout);
         changeWeekButton = findViewById(R.id.ChangeWeekButton);
     }
+
+    private void getCurrentWeekType()
+    {
+        ScheduleService.getWeekType().enqueue(new Callback<RawWeek>() {
+            @Override
+            public void onResponse(Call<RawWeek> call, Response<RawWeek> response) {
+                //hideLoading();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    // Конвертируем raw данные в нашу модель
+                    weekType = convertWeekType( response.body().getType());
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RawWeek> call, Throwable t) {
+                //hideLoading();
+                Toast.makeText(ScheduleActivity.this, "Не удалось получить тип недели!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
     private void loadScheduleFromAPI(int groupid) {
         // Показываем индикатор загрузки
         //showLoading();
@@ -111,6 +137,10 @@ public class ScheduleActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     // Конвертируем raw данные в нашу модель
                     response_week = response.body();
+
+
+                    Week week1 = ScheduleAdapter.convertToWeek(response_week,weekType);
+                    setupViewPager(week1);
 
                 } else {
                     // Если API не доступно, используем тестовые данные
@@ -128,6 +158,18 @@ public class ScheduleActivity extends AppCompatActivity {
         });
     }
 
+    private WeekType convertWeekType(RawWeek.WeekType wt)
+    {
+        switch (wt)
+        {
+            case LOWER:
+                return WeekType.LOWER;
+            case UPPER:
+                return WeekType.UPPER;
+            default:
+                return WeekType.COMBINBED;
+        }
+    }
 
     private void useTestData() {
         Week testWeek = TestWeekBuilder.createTestWeek();
