@@ -3,7 +3,7 @@ package com.alexanderl.mmcs_schedule.dataTransferObjects;
 import java.io.Serializable;
 
 public class Week implements Serializable {
-    private WeekType weekType;
+    public WeekType weekType;
     private DayOfWeek[] days;
 
     public Week(WeekType _wt, DayOfWeek[] d)

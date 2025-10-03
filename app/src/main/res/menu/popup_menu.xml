@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/current_week"
+        android:title="Текущая неделя" />
+
+    <item
+        android:id="@+id/upper_week"
+        android:title="Верхняя неделя" />
+
+    <item
+        android:id="@+id/down_week"
+        android:title="Нижняя неделя" />
+
+    <item
+        android:id="@+id/combine_week"
+        android:title="Полная неделя" />
+</menu>

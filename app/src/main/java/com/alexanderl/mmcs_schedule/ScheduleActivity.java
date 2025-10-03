@@ -1,6 +1,10 @@
 package com.alexanderl.mmcs_schedule;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,8 +30,10 @@ public class ScheduleActivity extends AppCompatActivity {
 
     private ViewPager2 viewPager;
     private TabLayout tabLayout;
+    private ImageButton changeWeekButton;
     private TextView todayTextView;
     private DayPageAdapter adapter;
+    private  RawScheduleOfGroup response_week;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,15 +50,58 @@ public class ScheduleActivity extends AppCompatActivity {
 
 
         loadScheduleFromAPI(group_id);
+        //week.weekType=
+
+        changeWeekButton.setOnClickListener(v -> {
+
+            PopupMenu popupMenu = new PopupMenu(ScheduleActivity.this, changeWeekButton);
+
+
+            popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
+
+
+            popupMenu.setOnMenuItemClickListener(menuItem -> {
+
+                String temp =menuItem.getTitle().toString();
+                Week week;
+                switch (temp)
+                {
+                    case "Текущая неделя":
+                        // тут запрос текущей недели
+                        break;
+                    case "Верхняя неделя":
+                        week = ScheduleAdapter.convertToWeek(response_week, WeekType.UPPER);
+                        setupViewPager(week);
+                        break;
+                    case "Нижняя неделя":
+                        week = ScheduleAdapter.convertToWeek(response_week, WeekType.LOWER);
+                        setupViewPager(week);
+                        break;
+                    case "Полная неделя":
+                        week = ScheduleAdapter.convertToWeek(response_week, WeekType.COMBINBED);
+                        setupViewPager(week);
+                        break;
+                }
+
+                // For debug
+                //Toast.makeText(ScheduleActivity.this, "You Clicked " + menuItem.getTitle(), Toast.LENGTH_SHORT).show();
+                return true;
+            });
+
+
+            popupMenu.show();
+        });
     }
 
     private void initViews() {
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
+        changeWeekButton = findViewById(R.id.ChangeWeekButton);
     }
     private void loadScheduleFromAPI(int groupid) {
         // Показываем индикатор загрузки
         //showLoading();
+
 
         ScheduleService.getGroupSchedule(groupid).enqueue(new Callback<RawScheduleOfGroup>() {
             @Override
@@ -61,8 +110,8 @@ public class ScheduleActivity extends AppCompatActivity {
 
                 if (response.isSuccessful() && response.body() != null) {
                     // Конвертируем raw данные в нашу модель
-                    Week week = ScheduleAdapter.convertToWeek(response.body(), WeekType.COMBINBED);
-                    setupViewPager(week);
+                    response_week = response.body();
+
                 } else {
                     // Если API не доступно, используем тестовые данные
                     useTestData();
@@ -84,7 +133,9 @@ public class ScheduleActivity extends AppCompatActivity {
         Week testWeek = TestWeekBuilder.createTestWeek();
         setupViewPager(testWeek);
     }
-
+    private void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
     private void setupViewPager(Week w) {
 
         //w = TestWeekBuilder.createTestWeek();
@@ -139,5 +190,17 @@ public class ScheduleActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
         int currentDay = savedInstanceState.getInt("CURRENT_DAY", 0);
         viewPager.setCurrentItem(currentDay, false);
+    }
+
+    public void goBackToChangeSchedulePage(View view)
+    {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+    }
+
+    public void changeWeekTypeButtonClicked(View view)
+    {
+
     }
 }

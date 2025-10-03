@@ -44,21 +44,22 @@
                 android:text="Текущая неделя: \n нижняя" />
 
             <ImageButton
-                android:id="@+id/imageButton2"
+                android:id="@+id/ChangeWeekButton"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@color/no_color"
+                android:onClick="changeWeekTypeButtonClicked"
                 app:srcCompat="@drawable/change_button_image" />
 
             <ImageButton
-                android:id="@+id/imageButton"
+                android:id="@+id/ExitButton"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-
+                android:onClick="goBackToChangeSchedulePage"
                 android:background="@color/no_color"
                 app:srcCompat="@drawable/exit_button_image" />
 
