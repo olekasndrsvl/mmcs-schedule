@@ -10,128 +10,169 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_gravity="bottom"
         android:background="@color/background">
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:fontFamily="@font/jetbrains_mono_bold"
-                android:textSize="12pt"
-                android:gravity="center"
-                android:background="@color/foreground"
-                android:text="Расписание МехМата"
-                android:padding="2pt"
-                android:layout_marginBottom="20dp"
-                />
 
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:fontFamily="@font/jetbrains_mono_bold"
+            android:textSize="12pt"
+            android:gravity="center"
+            android:background="@color/foreground"
+            android:text="Расписание МехМата"
+            android:padding="12dp"
+            android:layout_marginBottom="0dp" />
+
+        <!-- Тип расписания -->
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="match_parent"
+            android:layout_height="224dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@mipmap/mmcs_logo_dark_theme" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/head_color"
+            android:background="@drawable/rounded_all_corners"
             android:orientation="horizontal"
-            android:layout_marginHorizontal="3pt">
+            android:layout_marginHorizontal="4dp"
+            android:paddingVertical="8dp">
 
             <TextView
                 android:id="@+id/textView4"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:singleLine="true"
                 android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="8dp"
                 android:fontFamily="@font/jetbrains_mono_bold"
                 android:text="Тип расписания:"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <Spinner
                 android:id="@+id/spinner_mode"
-                android:layout_width="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_weight="1.5"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="12dp"
+                android:minWidth="120dp" />
         </LinearLayout>
 
+        <!-- Направление -->
         <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:layout_gravity="bottom">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_up_corners"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="4dp"
+            android:paddingVertical="8dp">
 
-                <LinearLayout
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="@font/jetbrains_mono_bold"
+                android:text="Направление:"
+                android:textColor="@color/black"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Контейнер для Spinner направления и индикатора загрузки -->
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.5"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="12dp">
+
+                <Spinner
+                    android:id="@+id/spinner2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@color/content_color"
-                    android:layout_marginHorizontal="3pt">
+                    android:minWidth="120dp" />
 
-                    <TextView
-                        android:id="@+id/textView2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
-                        android:singleLine="true"
-                        android:layout_weight="1"
-                        android:fontFamily="@font/jetbrains_mono_bold"
-                        android:text="Направление:"
-                        android:textColor="@color/white" />
+                <!-- Индикатор загрузки для Spinner направления -->
+                <ProgressBar
+                    android:id="@+id/progress_bar_direction"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:indeterminateTint="@color/foreground"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone" />
 
-                    <Spinner
-                        android:id="@+id/spinner2"
-                        android:layout_width="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
+            </RelativeLayout>
+        </LinearLayout>
 
-                        />
+        <!-- Группа -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_down_corners"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="4dp"
+            android:paddingVertical="8dp">
 
-                </LinearLayout>
-                <LinearLayout
+            <TextView
+                android:id="@+id/textView23"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="@font/jetbrains_mono_bold"
+                android:text="Группа:"
+                android:textColor="@color/black"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Контейнер для Spinner и индикатора загрузки группы -->
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.5"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="12dp">
+
+                <Spinner
+                    android:id="@+id/spinner_group"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@color/content_color"
-                    android:layout_marginHorizontal="3pt">
+                    android:minWidth="120dp" />
 
-                    <TextView
-                        android:id="@+id/textView23"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
+                <!-- Индикатор загрузки для Spinner групп -->
+                <ProgressBar
+                    android:id="@+id/progress_bar_group"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:indeterminateTint="@color/foreground"
+                    android:layout_centerInParent="true"
 
-                        android:layout_weight="1"
-                        android:fontFamily="@font/jetbrains_mono_bold"
-                        android:text="Группа:"
-                        android:singleLine="true"
-                        android:textColor="@color/white" />
+                    android:visibility="gone" />
 
-                    <Spinner
-                        android:id="@+id/spinner_group"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1" />
+            </RelativeLayout>
+        </LinearLayout>
 
-                </LinearLayout>
-                <Button
-                    android:id="@+id/open_schedule_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="3pt"
-                    android:background="@color/foreground"
-                    android:fontFamily="@font/jetbrains_mono_bold"
-                    android:onClick="showSheduleButtonClick"
-                    android:text="Перейти к расписанию"
+        <!-- Кнопка -->
+        <Button
+            android:id="@+id/open_schedule_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:background="@drawable/round_button"
+            android:fontFamily="@font/jetbrains_mono_bold"
+            android:onClick="showSheduleButtonClick"
+            android:text="Перейти к расписанию"
+            android:textColor="@color/white" />
 
-                    android:textColor="@color/white" />
-            </LinearLayout>
     </LinearLayout>
-
-
-
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

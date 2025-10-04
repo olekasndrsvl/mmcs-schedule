@@ -4,9 +4,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/background"
-    android:textSize="20sp"
+    android:background="@color/content_color"
+    android:fontFamily="@font/jetbrains_mono_bold"
+    android:textSize="14sp"
     android:gravity="center"
-    android:textColor="@color/white"
+    android:textColor="@color/black"
 
     />

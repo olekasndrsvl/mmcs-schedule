@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -31,7 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapter_groups;
     private List<String> groupList = new ArrayList<>();
     private List<RawGroup> rawGroups = new ArrayList<>();
-
+    private ProgressBar loadingGradesProgressBar;
+    private ProgressBar loadingGroupsProgressBar;
     private int selectedGroupId;
     private String selectedGroupName;
     Dictionary<String,Integer> grades_dict = new Hashtable<String, Integer>();
@@ -44,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
         Spinner spinner1 = findViewById(R.id.spinner2);
         Spinner spinner = findViewById(R.id.spinner_group);
 
+        loadingGradesProgressBar = findViewById(R.id.progress_bar_direction);
+        loadingGroupsProgressBar= findViewById(R.id.progress_bar_group);
 
         adapter_courses = new ArrayAdapter<>(this, R.layout.spinner_item, gradeList);
         adapter_courses.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -55,9 +59,9 @@ public class MainActivity extends AppCompatActivity {
 
         spinner1.setAdapter(adapter_courses);
         spinner.setAdapter(adapter_groups);
-
+        loadingGradesProgressBar.setVisibility(View.VISIBLE);
         loadGrades();
-
+        loadingGroupsProgressBar.setVisibility(View.VISIBLE);
 
 
         AdapterView.OnItemSelectedListener itemSelectedListener_course = new AdapterView.OnItemSelectedListener() {
@@ -164,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
             group_dict.put(temp,group.getId());
         }
         adapter_groups.notifyDataSetChanged();
+        loadingGroupsProgressBar.setVisibility(View.INVISIBLE);
     }
     private void processGrades(List<RawGrade> grades) {
         rawGrades.clear();
@@ -178,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
             gradeList.add(displayText);
         }
         adapter_courses.notifyDataSetChanged();
+        loadingGradesProgressBar.setVisibility(View.INVISIBLE);
     }
 
     private String getDisplayText(RawGrade grade) {
