@@ -3,7 +3,27 @@
     <style name="Base.Theme.MMCSSCHEDULE" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-        <item name="colorPrimary">@color/foreground</item>
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="appBackground">@color/background_light</item>
+        <item name="appForeground">@color/foreground_light</item>
+        <item name="appCardBackground">@color/card_background_light</item>
+        <item name="appTextPrimary">@color/text_primary_light</item>
+        <item name="appTextSecondary">@color/text_secondary_light</item>
+        <item name="appAccent">@color/accent_light</item>
+        <item name="blackOnLight">@color/black</item>
+        <item name="whiteOnLight">@color/white</item>
+        <item name="mmcsLogo">@drawable/mmcs_logo_light</item>
+        <!-- Material 3 colors for light theme -->
+        <item name="colorPrimary">@color/card_background_light</item>
+        <item name="colorOnPrimary">@color/text_primary_light</item>
+        <item name="colorPrimaryContainer">@color/card_background_light</item>
+        <item name="colorSecondary">@color/accent_light</item>
+        <item name="colorOnSecondary">@color/foreground_light</item>
+        <item name="android:statusBarColor">@color/card_background_light</item>
+
+
+
     </style>
 
     <style name="Theme.MMCSSCHEDULE" parent="Base.Theme.MMCSSCHEDULE" />

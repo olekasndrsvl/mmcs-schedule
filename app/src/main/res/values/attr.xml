@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="appBackground" format="color|reference" />
+    <attr name="appForeground" format="color|reference" />
+    <attr name="appCardBackground" format="color|reference" />
+    <attr name="appTextPrimary" format="color|reference" />
+    <attr name="appTextSecondary" format="color|reference" />
+    <attr name="appAccent" format="color|reference" />
+    <attr name="mmcsLogo" format="reference" />
+    <attr name="blackOnLight" format="color|reference" />"
+    <attr name="whiteOnLight" format="color|reference" />"
+</resources>

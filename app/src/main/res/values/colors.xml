@@ -8,4 +8,34 @@
     <color name="no_color">#00000000</color>
     <color name="head_color">#948979</color>
     <color name="content_color">#DFD0B8</color>
+
+    <color name="head_font">#FFFFFFFF</color>
+    <color name="content_font">#FF000000</color>
+
+<!--    &lt;!&ndash; Светлая тема (новые цвета) &ndash;&gt;-->
+<!--    <color name="background_light">#FFFFFF</color>-->
+<!--    <color name="foreground_light">#93383f</color>-->
+<!--    <color name="head_font_light">#FFFFFF</color>-->
+<!--    <color name="content_font_light">#FFFFFF</color>-->
+<!--    <color name="accent_light">#c05961</color>-->
+
+
+
+
+    <!-- Light theme colors -->
+    <color name="background_light">#FAFAFA</color>
+    <color name="foreground_light">#FFFFFF</color>
+    <color name="card_background_light">#93383f</color>
+    <color name="text_primary_light">#212121</color>
+    <color name="text_secondary_light">#666666</color>
+    <color name="accent_light">#c05961</color>
+
+    <!-- Dark theme colors -->
+    <color name="background_dark">#222831</color>
+    <color name="foreground_dark">#393E46</color>
+    <color name="card_background_dark">#393E46</color>
+    <color name="text_primary_dark">#FFFFFF</color>
+    <color name="text_secondary_dark">#DFD0B8</color>
+    <color name="accent_dark">#948979</color>
+
 </resources>

@@ -11,9 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="24sp"
-        android:background="@color/head_color"
+        android:background="@drawable/rounded_all_corners"
         android:fontFamily="@font/jetbrains_mono_bold"
         android:text="Monday"
+        android:layout_marginHorizontal="4dp"
         android:textColor="@color/white"
         android:gravity="center"/>
 
@@ -24,7 +25,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="0pt"
-        android:background="@color/content_color"
+        android:layout_marginHorizontal="4dp"
+        android:background="@drawable/rounded_all_corners_for_schedule_day"
         android:textColor="@color/black"/>
 
 </LinearLayout>

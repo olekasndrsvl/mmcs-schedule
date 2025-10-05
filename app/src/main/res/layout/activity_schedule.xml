@@ -7,7 +7,7 @@
     tools:context=".ScheduleActivity">
     <LinearLayout
         android:layout_width="match_parent"
-        android:background="@color/background"
+        android:background="?attr/appBackground"
         android:layout_height="match_parent"
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
@@ -19,8 +19,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:background="@color/top_foreground"
-            android:orientation="horizontal">
+            android:background="?attr/appCardBackground"
+            android:orientation="horizontal"
+            android:layout_marginBottom="5dp">
 
             <TextView
                 android:id="@+id/group_name_textview"
@@ -41,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_gravity="center"
-                android:textAlignment="textStart"
+
                 android:text="Текущая неделя:\n нижняя" />
 
             <ImageButton
@@ -81,7 +82,7 @@
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:minHeight="70dp"
-        android:background="@color/foreground"
+        android:background="?attr/appCardBackground"
         android:layout_height="wrap_content"
         android:fontFamily="@font/jetbrains_mono_bold"
         app:tabTextColor="@color/white"

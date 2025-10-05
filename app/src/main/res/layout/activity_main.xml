@@ -10,17 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@color/background">
+        android:background="?attr/appBackground">
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+            android:textColor="@color/head_font"
             android:fontFamily="@font/jetbrains_mono_bold"
             android:textSize="12pt"
             android:gravity="center"
-            android:background="@color/foreground"
+            android:background="?attr/appCardBackground"
             android:text="Расписание МехМата"
             android:padding="12dp"
             android:layout_marginBottom="0dp" />
@@ -31,7 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="224dp"
             android:scaleType="centerCrop"
-            app:srcCompat="@mipmap/mmcs_logo_dark_theme" />
+            app:srcCompat="?attr/mmcsLogo" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -171,7 +171,7 @@
             android:fontFamily="@font/jetbrains_mono_bold"
             android:onClick="showSheduleButtonClick"
             android:text="Перейти к расписанию"
-            android:textColor="@color/white" />
+            android:textColor="@color/head_font" />
 
     </LinearLayout>
 
