@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -26,6 +27,7 @@ import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity {
+    private Button showScheduleButton;
     private List<String> gradeList = new ArrayList<>();
     private List<RawGrade> rawGrades = new ArrayList<>();
     private ArrayAdapter<String> adapter_courses;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        showScheduleButton = findViewById(R.id.open_schedule_button);
         Spinner spinner1 = findViewById(R.id.spinner2);
         Spinner spinner = findViewById(R.id.spinner_group);
 
@@ -111,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<RawGrade.List> call, Response<RawGrade.List> response) {
                 if (response.isSuccessful()) {
+                    showScheduleButton.setText("Перейти к расписанию");
                     RawGrade.List grades = response.body();
                     if (grades != null && !grades.isEmpty()) {
                         processGrades(grades);
@@ -125,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<RawGrade.List> call, Throwable t) {
                 showError("Ошибка сети: " + t.getMessage());
+                showScheduleButton.setText("Попробовать еще раз");
             }
         });
     }
@@ -150,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<RawGroup.List> call, Throwable t) {
                 showError("Ошибка сети: " + t.getMessage());
+                showScheduleButton.setText("Попробовать еще раз");
             }
         });
     }
@@ -205,18 +211,25 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 
         // Добавляем заглушку в Spinner
-        gradeList.clear();
-        gradeList.add("Не удалось загрузить данные");
-        adapter_courses.notifyDataSetChanged();
+//        gradeList.clear();
+//        gradeList.add("Не удалось загрузить данные");
+//        adapter_courses.notifyDataSetChanged();
     }
 
     public void showSheduleButtonClick(View view) {
-        Intent intent = new Intent(this, ScheduleActivity.class);
-        intent.putExtra("schedule_type",1);
+        if(!(loadingGradesProgressBar.getVisibility() == View.VISIBLE) && !(loadingGroupsProgressBar.getVisibility() == View.VISIBLE)) {
+            Intent intent = new Intent(this, ScheduleActivity.class);
+            intent.putExtra("schedule_type", 1);
 
 
-        intent.putExtra("groupid",selectedGroupId); // id: 53 ФИИТ 3.3 расписание
-        intent.putExtra("groupname",selectedGroupName);
-        startActivity(intent);
+            intent.putExtra("groupid", selectedGroupId); // id: 53 ФИИТ 3.3 расписание
+            intent.putExtra("groupname", selectedGroupName);
+            startActivity(intent);
+        }
+        else
+        {
+            loadGrades();
+            showScheduleButton.setText("Загрузка...");
+        }
     }
 }
