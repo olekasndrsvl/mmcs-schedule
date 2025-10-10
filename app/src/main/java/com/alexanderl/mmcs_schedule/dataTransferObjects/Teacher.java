@@ -5,10 +5,13 @@ public class Teacher
     private String name;
     private String degeree;
 
-    public Teacher(String _name, String _degeree)
+    private int teacherId;
+    public Teacher(int teacherid, String _name, String _degeree)
     {
         name=_name;
         degeree=_degeree;
+        teacherId=teacherid;
+
     }
     @Override
     public String toString()

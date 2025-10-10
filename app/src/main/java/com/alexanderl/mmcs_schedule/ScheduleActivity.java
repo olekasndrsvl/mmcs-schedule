@@ -1,10 +1,15 @@
 package com.alexanderl.mmcs_schedule;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +22,9 @@ import com.alexanderl.mmcs_schedule.API.primitives.RawWeek;
 import com.alexanderl.mmcs_schedule.API.primitives.ScheduleService;
 import com.alexanderl.mmcs_schedule.adapters.DayPageAdapter;
 import com.alexanderl.mmcs_schedule.adapters.ScheduleAdapter;
+import com.alexanderl.mmcs_schedule.dataTransferObjects.Lesson;
+import com.alexanderl.mmcs_schedule.dataTransferObjects.Room;
+import com.alexanderl.mmcs_schedule.dataTransferObjects.Teacher;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.TestWeekBuilder;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.Week;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.WeekType;
@@ -37,6 +45,7 @@ public class ScheduleActivity extends AppCompatActivity {
     private DayPageAdapter adapter;
     private  RawScheduleOfGroup response_week;
     private WeekType weekType;
+    private PreferencesManager prefsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,11 +56,22 @@ public class ScheduleActivity extends AppCompatActivity {
         int group_id=1;
         String groupName ="<group>";
 
+        prefsManager = new PreferencesManager(this);
+
         Bundle arguments = getIntent().getExtras();
-        if(arguments!=null) {
-             type_of_schedule = arguments.getInt("schedule_type", 1);
-             group_id = arguments.getInt("groupid", 1);
-             groupName = arguments.getString("groupname", "FIIT3");
+        if(arguments != null) {
+            type_of_schedule = arguments.getInt("schedule_type", 1);
+            group_id = arguments.getInt("groupid", prefsManager.getSelectedGroupId());
+            groupName = arguments.getString("groupname", prefsManager.getSelectedGroupName());
+
+            // Сохраняем выбранную группу (на случай если пришли с новым выбором)
+            if (arguments.containsKey("groupid")) {
+                prefsManager.saveSelectedGroup(group_id, groupName);
+            }
+        } else {
+            // Если Intent пустой, используем сохраненную группу
+            group_id = prefsManager.getSelectedGroupId();
+            groupName = prefsManager.getSelectedGroupName();
         }
 
         groupNameTextView.setText(groupName);
@@ -170,12 +190,23 @@ public class ScheduleActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<RawScheduleOfGroup> call, Throwable t) {
-                //hideLoading();
                 // При ошибке используем тестовые данные
                 useTestData();
                 Toast.makeText(ScheduleActivity.this, "Используются тестовые данные", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        // При нажатии назад очищаем выбор группы и возвращаемся к MainActivity
+        super.onBackPressed();
+        prefsManager.clearSelectedGroup();
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private WeekType convertWeekType(RawWeek.WeekType wt)
@@ -203,9 +234,10 @@ public class ScheduleActivity extends AppCompatActivity {
         //w = TestWeekBuilder.createTestWeek();
         // Создаем адаптер
         adapter = new DayPageAdapter(this, w);
+
         viewPager.setAdapter(adapter);
 
-        // Настраиваем TabLayout для отображения индикаторов
+
         new TabLayoutMediator(tabLayout, viewPager,
                 new TabLayoutMediator.TabConfigurationStrategy() {
                     @Override
@@ -217,6 +249,59 @@ public class ScheduleActivity extends AppCompatActivity {
 
     }
 
+    @SuppressLint("SetTextI18n")
+    void showLessonPopup(View anchorView, Lesson lesson) {
+        // Создаем и настраиваем popup окно
+        PopupWindow popupWindow = new PopupWindow(this);
+        View popupView = getLayoutInflater().inflate(R.layout.popup_lesson_details, null);
+
+        // Настраиваем содержимое popup
+        TextView tvSubject = popupView.findViewById(R.id.tvSubject);
+        TextView tvTeacher = popupView.findViewById(R.id.tvTeacher);
+        TextView tvTime = popupView.findViewById(R.id.tvTime);
+        TextView tvClassroom = popupView.findViewById(R.id.tvClassroom);
+
+        Button btnClose = popupView.findViewById(R.id.btnClose);
+
+        tvSubject.setText(lesson.getCurriculaName());
+
+        // Формируем строку преподавателей
+        StringBuilder teachersString = new StringBuilder();
+        for (Teacher teacher : lesson.getTeachers()) {
+            if (teachersString.length() > 0) {
+                teachersString.append("\n");
+            }
+            teachersString.append(teacher.toString());
+        }
+        tvTeacher.setText( (teachersString.length() > 0 ? teachersString.toString() : "не указан"));
+
+        tvTime.setText("Время: " + lesson.getTbegin() + " - " + lesson.getTend());
+
+        // Формируем строку аудиторий
+        StringBuilder roomsString = new StringBuilder();
+        for (Room room : lesson.getRooms()) {
+            if (roomsString.length() > 0) {
+                roomsString.append(", ");
+            }
+            roomsString.append(room.getRoomName());
+        }
+        tvClassroom.setText( (roomsString.length() > 0 ? roomsString.toString() : "не указана"));
+
+
+
+        // Обработчик закрытия
+        btnClose.setOnClickListener(v -> popupWindow.dismiss());
+
+        // Настройка popup window для отображения по центру на всю ширину
+        popupWindow.setContentView(popupView);
+        popupWindow.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
+        popupWindow.setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
+        popupWindow.setFocusable(true);
+
+        // Показываем popup по центру экрана
+        View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
+        popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
+    }
 
 
     private String getDayOfWeekByNumber(int num)
@@ -254,13 +339,13 @@ public class ScheduleActivity extends AppCompatActivity {
 
     public void goBackToChangeSchedulePage(View view)
     {
+
+        prefsManager.clearSelectedGroup();
         Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-    }
-
-    public void changeWeekTypeButtonClicked(View view)
-    {
+        finish();
 
     }
+
 }

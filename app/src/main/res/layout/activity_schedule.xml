@@ -52,7 +52,6 @@
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@color/no_color"
-                android:onClick="changeWeekTypeButtonClicked"
                 app:srcCompat="@drawable/change_button_image" />
 
             <ImageButton

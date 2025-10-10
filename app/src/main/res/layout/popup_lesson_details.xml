@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_marginHorizontal="10dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/rounded_all_corners_for_schedule_day">
+
+    <TextView
+        android:id="@+id/tvSubject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:text="Test"
+        android:fontFamily="@font/jetbrains_mono_bold"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/tTeacher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"
+            android:text="Преподаватель:"
+            android:fontFamily="@font/jetbrains_mono_bold"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/tvTeacher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"
+            android:layout_marginLeft="5dp"
+            android:clickable="true"
+            android:text="Михалкович Станислав Станиславович"
+            android:fontFamily="@font/jetbrains_mono_bold"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+
+
+
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/black"
+        android:text="Test"
+        android:fontFamily="@font/jetbrains_mono_bold"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/tClassRoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"
+            android:text="Аудитория:"
+            android:fontFamily="@font/jetbrains_mono_bold"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/tvClassroom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"
+            android:layout_marginLeft="5dp"
+            android:text="102,120,320,304"
+            android:fontFamily="@font/jetbrains_mono_bold"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:textColor="@color/white"
+        android:background="@drawable/round_button"
+        android:fontFamily="@font/jetbrains_mono_bold"
+        android:text="Закрыть" />
+
+</LinearLayout>

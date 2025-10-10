@@ -6,19 +6,19 @@ public class Lesson {
     private Time tend;
     private String curriculaName;
     private String additional_info;
-    private Room room;
-    private Teacher teacher;
+    private Room[] room;
+    private Teacher[] teachers;
 
-    public Lesson(Time tb, Time te, String curriculaName, String additional_info, Room room, Teacher teacher) {
+    public Lesson(Time tb, Time te, String curriculaName, String additional_info, Room[] room, Teacher[] teacher) {
         this.tbegin = tb;
         this.tend=te;
         this.curriculaName = curriculaName;
         this.additional_info = additional_info;
         this.room = room;
-        this.teacher = teacher;
+        this.teachers = teacher;
     }
 
-    public Room getRoom() {
+    public Room[] getRooms() {
         return room;
     }
 
@@ -38,13 +38,15 @@ public class Lesson {
         return tend;
     }
 
-    public Teacher getTeacher() {
-        return teacher;
+    public Teacher[] getTeachers() {
+        return teachers;
     }
 
     @Override
     public String toString()
     {
-        return tbegin+"-"+tend+" "+curriculaName+" "+ room+ " "+teacher+ " "+additional_info;
+        return tbegin+"-"+tend+" "+curriculaName+" "+ room+ " "+teachers[0]+ " "+additional_info;
     }
+
+
 }

@@ -14,6 +14,7 @@ public class ScheduleAdapter {
 
         // Создаем мапу для быстрого доступа к урокам по ID
         Map<Integer, RawLesson> lessonMap = new HashMap<>();
+
         for (RawLesson rawLesson : rawSchedule.getLessons()) {
             lessonMap.put(rawLesson.getId(), rawLesson);
         }
@@ -53,7 +54,7 @@ public class ScheduleAdapter {
                 if (lesson != null) {
                     TimeslotData timeslot = parseTimeslot(lesson.getTimeSlot());
                     if (timeslot != null) {
-                        Lesson convertedLesson = convertToGroupedLesson(curriculaList, timeslot, lesson);
+                        Lesson convertedLesson = convertToGroupedLesson(curriculaList, timeslot, lesson, weekType);
                         if (convertedLesson != null) {
                             lessonsByDay.get(timeslot.dayOfWeek).add(convertedLesson);
                         }
@@ -81,7 +82,7 @@ public class ScheduleAdapter {
         return new Week(weekType, days);
     }
 
-    private static Lesson convertToGroupedLesson(List<RawCurriculum> curriculaList, TimeslotData timeslot, RawLesson rawLesson) {
+    private static Lesson convertToGroupedLesson(List<RawCurriculum> curriculaList, TimeslotData timeslot, RawLesson rawLesson, WeekType targetWeekType) {
         try {
             if (curriculaList.isEmpty()) return null;
 
@@ -91,64 +92,58 @@ public class ScheduleAdapter {
             Time startTime = new Time(timeslot.startHours, timeslot.startMinutes);
             Time endTime = new Time(timeslot.endHours, timeslot.endMinutes);
 
-            // Определяем аудиторию (если все одинаковые - берем первую, иначе указываем несколько)
-            String roomInfo = getGroupedRoomInfo(curriculaList);
-            Room room = new Room(0); // Создаем фиктивную комнату, т.к. может быть несколько
+            // Собираем уникальные комнаты
+            Room[] rooms = getUniqueRooms(curriculaList);
 
-            // Определяем преподавателя (если все одинаковые - берем первого, иначе указываем несколько)
-            String teacherInfo = getGroupedTeacherInfo(curriculaList);
-            Teacher teacher = new Teacher(teacherInfo, "");
+            // Собираем уникальных преподавателей
+            Teacher[] teachers = getUniqueTeachers(curriculaList);
 
-            // Формируем дополнительную информацию с учетом подгрупп
-            String additionalInfo = buildGroupedAdditionalInfo(curriculaList, rawLesson, roomInfo);
+            // Формируем дополнительную информацию с учетом подгрупп и типа недели
+            String additionalInfo = buildGroupedAdditionalInfo(curriculaList, rawLesson, timeslot.weekType, targetWeekType);
 
-            return new Lesson(startTime, endTime, firstCurriculum.getSubjectName(), additionalInfo, room, teacher);
+            return new Lesson(startTime, endTime, firstCurriculum.getSubjectName(), additionalInfo, rooms, teachers);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private static String getGroupedRoomInfo(List<RawCurriculum> curriculaList) {
-        if (curriculaList.isEmpty()) return "Ауд. не указана";
+    private static Room[] getUniqueRooms(List<RawCurriculum> curriculaList) {
+        if (curriculaList.isEmpty()) return new Room[0];
 
-        Set<String> uniqueRooms = new HashSet<>();
+        Map<Integer, Room> uniqueRooms = new HashMap<>();
         for (RawCurriculum curriculum : curriculaList) {
             if (curriculum.getRoomName() != null && !curriculum.getRoomName().trim().isEmpty()) {
-                uniqueRooms.add(curriculum.getRoomName());
+                int roomId = curriculum.getRoomId();
+                if (!uniqueRooms.containsKey(roomId)) {
+                    uniqueRooms.put(roomId, new Room(curriculum.getRoomId(), curriculum.getRoomName()));
+                }
             }
         }
 
-        if (uniqueRooms.isEmpty()) return "Ауд. не указана";
-        if (uniqueRooms.size() == 1) return "Ауд. " + uniqueRooms.iterator().next();
-
-        // Если аудиторий несколько, формируем строку
-        return "Ауд. " + String.join(", ", uniqueRooms);
+        return uniqueRooms.values().toArray(new Room[0]);
     }
 
-    private static String getGroupedTeacherInfo(List<RawCurriculum> curriculaList) {
-        if (curriculaList.isEmpty()) return "Преподаватель не указан";
+    private static Teacher[] getUniqueTeachers(List<RawCurriculum> curriculaList) {
+        if (curriculaList.isEmpty()) return new Teacher[0];
 
-        Set<String> uniqueTeachers = new HashSet<>();
+        Map<String, Teacher> uniqueTeachers = new HashMap<>();
         for (RawCurriculum curriculum : curriculaList) {
             String teacherName = curriculum.getTeacherName();
             if (teacherName != null && !teacherName.trim().isEmpty() && !teacherName.equals("null")) {
-                uniqueTeachers.add(teacherName.trim());
+                String teacherFullName = teacherName.trim();
+                if (!uniqueTeachers.containsKey(teacherFullName)) {
+                    // Создаем Teacher с именем, а степень оставляем пустой
+                    uniqueTeachers.put(teacherFullName, new Teacher(curriculum.getTeacherId(), teacherFullName, ""));
+                }
             }
         }
 
-        if (uniqueTeachers.isEmpty()) return "Преподаватель не указан";
-        if (uniqueTeachers.size() == 1) return uniqueTeachers.iterator().next();
-
-        // Если преподавателей несколько
-        return "Несколько преподавателей";
+        return uniqueTeachers.values().toArray(new Teacher[0]);
     }
 
-    private static String buildGroupedAdditionalInfo(List<RawCurriculum> curriculaList, RawLesson rawLesson, String roomInfo) {
+    private static String buildGroupedAdditionalInfo(List<RawCurriculum> curriculaList, RawLesson rawLesson, String lessonWeekType, WeekType targetWeekType) {
         StringBuilder info = new StringBuilder();
-
-
-
 
         // Добавляем информацию о подгруппах
         Set<Integer> subGroups = new TreeSet<>();
@@ -158,18 +153,21 @@ public class ScheduleAdapter {
             }
         }
 
-        if (!subGroups.isEmpty()) {
-            if (info.length() > 0) info.append(", ");
-            if (subGroups.size() == 1) {
-                info.append("подгр. ").append(subGroups.iterator().next());
-            } else {
-                info.append("подгр. ").append(formatSubgroups(subGroups));
-            }
-        }
+//        if (!subGroups.isEmpty()) {
+//            if (info.length() > 0) info.append(", ");
+//            if (subGroups.size() == 1) {
+//                info.append("подгр. ").append(subGroups.iterator().next());
+//            } else {
+//                info.append("подгр. ").append(formatSubgroups(subGroups));
+//            }
+//        }
 
-        // Добавляем информацию об аудитории
-        if (info.length() > 0) info.append(", ");
-        info.append(roomInfo);
+        // Добавляем информацию о типе недели, если отображается COMBINED неделя
+        if (targetWeekType == WeekType.COMBINBED) {
+            String weekTypeInfo = getWeekTypeDisplayName(lessonWeekType);
+            if (info.length() > 0) info.append(", ");
+            info.append(weekTypeInfo);
+        }
 
         // Добавляем информацию из урока если есть
         if (rawLesson.getInfo() != null && !rawLesson.getInfo().isEmpty()) {
@@ -178,6 +176,19 @@ public class ScheduleAdapter {
         }
 
         return info.toString();
+    }
+
+    private static String getWeekTypeDisplayName(String weekType) {
+        switch (weekType.toLowerCase()) {
+            case "upper":
+                return "верхняя неделя";
+            case "lower":
+                return "нижняя неделя";
+            case "full":
+                return "";
+            default:
+                return weekType;
+        }
     }
 
     private static String formatSubgroups(Set<Integer> subGroups) {

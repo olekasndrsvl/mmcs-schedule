@@ -17,9 +17,9 @@ import com.alexanderl.mmcs_schedule.API.primitives.RawGroup;
 import com.alexanderl.mmcs_schedule.API.primitives.ScheduleService;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,6 +27,9 @@ import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity {
+    private static final String PREFS_NAME = "SchedulePrefs";
+    private static final String KEY_GROUP_ID = "selected_group_id";
+    private static final String KEY_GROUP_NAME = "selected_group_name";
     private Button showScheduleButton;
     private List<String> gradeList = new ArrayList<>();
     private List<RawGrade> rawGrades = new ArrayList<>();
@@ -38,11 +41,22 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar loadingGroupsProgressBar;
     private int selectedGroupId;
     private String selectedGroupName;
-    Dictionary<String,Integer> grades_dict = new Hashtable<String, Integer>();
-    Dictionary<String,Integer> group_dict = new Hashtable<String, Integer>();
+    private PreferencesManager prefsManager;
+
+    Map<String,Integer> grades_dict = new Hashtable<String, Integer>();
+    Map<String,Integer> group_dict = new Hashtable<String, Integer>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        prefsManager = new PreferencesManager(this);
+
+        // Проверяем, была ли выбрана группа ранее
+        if (prefsManager.isGroupSelected()) {
+            // Если группа выбрана, сразу переходим к ScheduleActivity
+            goToScheduleActivity();
+            return;
+        }
+        
         setContentView(R.layout.activity_main);
 
         showScheduleButton = findViewById(R.id.open_schedule_button);
@@ -105,6 +119,17 @@ public class MainActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(itemSelectedListener_group);
     }
 
+    private void goToScheduleActivity() {
+        Intent intent = new Intent(this, ScheduleActivity.class);
+        intent.putExtra("groupid", prefsManager.getSelectedGroupId());
+        intent.putExtra("groupname", prefsManager.getSelectedGroupName());
+        intent.putExtra("schedule_type", 1); // или ваш тип расписания
+
+        // Очищаем back stack чтобы нельзя было вернуться назад
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
 
     private void loadGrades() {
 
@@ -133,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     private void loadGroups(int id)
     {
         Call<RawGroup.List> call = ScheduleService.getGroups(id);
@@ -167,6 +193,9 @@ public class MainActivity extends AppCompatActivity {
         rawGroups.addAll(groups);
 
         groupList.clear();
+        selectedGroupId = groups.get(0).getId();
+        selectedGroupName= String.format("%s %s.%s",groups.get(0).getName(), groups.get(0).getGradeId(), groups.get(0).getNum());
+
         for(RawGroup group : groups)
         {
             String temp = String.format("%s %s.%s",group.getName(), group.getGradeId(), group.getNum());
