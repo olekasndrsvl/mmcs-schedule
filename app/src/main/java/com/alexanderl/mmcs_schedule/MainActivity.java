@@ -2,6 +2,7 @@ package com.alexanderl.mmcs_schedule;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,11 +32,14 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "SchedulePrefs";
     private static final String KEY_GROUP_ID = "selected_group_id";
     private static final String KEY_GROUP_NAME = "selected_group_name";
+    private String currentScheduleMode;
     private Button showScheduleButton;
     private List<String> gradeList = new ArrayList<>();
     private List<RawGrade> rawGrades = new ArrayList<>();
+    private List<String> modesSchedule = new ArrayList<>();
     private ArrayAdapter<String> adapter_courses;
     private ArrayAdapter<String> adapter_groups;
+    private ArrayAdapter<String> adapter_modes;
     private List<String> groupList = new ArrayList<>();
     private List<RawGroup> rawGroups = new ArrayList<>();
     private ProgressBar loadingGradesProgressBar;
@@ -59,6 +64,18 @@ public class MainActivity extends AppCompatActivity {
         
         setContentView(R.layout.activity_main);
 
+        Spinner spinner_mode = findViewById(R.id.spinner_mode);
+        modesSchedule= new ArrayList<String>(){{
+            add("Группа");
+            add("Преподаватель");
+            add("Аудитория");
+        }};
+        currentScheduleMode="Группа";
+
+        adapter_modes = new ArrayAdapter<>(this, R.layout.spinner_item_top, modesSchedule);
+        adapter_modes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+
         showScheduleButton = findViewById(R.id.open_schedule_button);
         Spinner spinner1 = findViewById(R.id.spinner2);
         Spinner spinner = findViewById(R.id.spinner_group);
@@ -76,10 +93,28 @@ public class MainActivity extends AppCompatActivity {
 
         spinner1.setAdapter(adapter_courses);
         spinner.setAdapter(adapter_groups);
+        spinner_mode.setAdapter(adapter_modes);
         loadingGradesProgressBar.setVisibility(View.VISIBLE);
+
         loadGrades();
         loadingGroupsProgressBar.setVisibility(View.VISIBLE);
+        AdapterView.OnItemSelectedListener itemSelectedListener_mode = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
+                // Получаем выбранный объект
+                String item = (String)parent.getItemAtPosition(position);
+                Log.i("USER_CHOICE_MODE",item);
+                Toast.makeText(MainActivity.this,"Selected!",Toast.LENGTH_LONG);
+                currentScheduleMode=item;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                loadGroups(1);
+            }
+        };
+        spinner_mode.setOnItemSelectedListener(itemSelectedListener_mode);
 
         AdapterView.OnItemSelectedListener itemSelectedListener_course = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -87,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Получаем выбранный объект
                 String item = (String)parent.getItemAtPosition(position);
+                Log.i("USER_CHOICE_COURSE",item);
                 //Toast.makeText(MainActivity.this,"Selected!",Toast.LENGTH_LONG);
                 int id_g = grades_dict.get(item);
                 loadGroups(id_g);
@@ -106,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Получаем выбранный объект
                 String item = (String)parent.getItemAtPosition(position);
+                Log.i("USER_CHOICE_GROUP",item);
                 //Toast.makeText(MainActivity.this,"Selected!",Toast.LENGTH_LONG);
                 selectedGroupId = group_dict.get(item);
                 selectedGroupName= item;
@@ -134,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadGrades() {
 
         Call<RawGrade.List> call = ScheduleService.getGrades();
-
+        Log.i( "API", "Waiting response....");
         call.enqueue(new Callback<RawGrade.List>() {
             @Override
             public void onResponse(Call<RawGrade.List> call, Response<RawGrade.List> response) {
@@ -143,11 +180,14 @@ public class MainActivity extends AppCompatActivity {
                     RawGrade.List grades = response.body();
                     if (grades != null && !grades.isEmpty()) {
                         processGrades(grades);
+                        Log.i("API", "Grades loaded successfully");
                     } else {
                         showError("Нет данных для отображения");
+                        Log.e("API", "No grades found");
                     }
                 } else {
                     showError("Ошибка сервера: " + response.code());
+                    Log.e("API", "Server error: " + response.code());
                 }
             }
 
@@ -155,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<RawGrade.List> call, Throwable t) {
                 showError("Ошибка сети: " + t.getMessage());
                 showScheduleButton.setText("Попробовать еще раз");
+                Log.e("API", "Network error: " + t.getMessage());
             }
         });
     }
@@ -162,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadGroups(int id)
     {
         Call<RawGroup.List> call = ScheduleService.getGroups(id);
-
+        Log.i( "API", "Waiting response....");
         call.enqueue(new Callback<RawGroup.List>() {
             @Override
             public void onResponse(Call<RawGroup.List> call, Response<RawGroup.List> response) {
@@ -170,11 +211,14 @@ public class MainActivity extends AppCompatActivity {
                     RawGroup.List groups = response.body();
                     if (groups != null && !groups.isEmpty()) {
                         processGroups(groups);
+                        Log.i("API", "Groups loaded successfully");
                     } else {
                         showError("Нет данных для отображения");
+                        Log.e("API", "No groups found");
                     }
                 } else {
                     showError("Ошибка сервера: " + response.code());
+                    Log.e("API", "Server error: " + response.code());
                 }
             }
 
@@ -182,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<RawGroup.List> call, Throwable t) {
                 showError("Ошибка сети: " + t.getMessage());
                 showScheduleButton.setText("Попробовать еще раз");
+                Log.e("API", "Network error: " + t.getMessage());
             }
         });
     }
@@ -239,26 +284,30 @@ public class MainActivity extends AppCompatActivity {
     private void showError(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 
-        // Добавляем заглушку в Spinner
-//        gradeList.clear();
-//        gradeList.add("Не удалось загрузить данные");
-//        adapter_courses.notifyDataSetChanged();
     }
 
     public void showSheduleButtonClick(View view) {
-        if(!(loadingGradesProgressBar.getVisibility() == View.VISIBLE) && !(loadingGroupsProgressBar.getVisibility() == View.VISIBLE)) {
-            Intent intent = new Intent(this, ScheduleActivity.class);
-            intent.putExtra("schedule_type", 1);
+        if(Objects.equals(currentScheduleMode, "Группа")) {
+            if (!(loadingGradesProgressBar.getVisibility() == View.VISIBLE) && !(loadingGroupsProgressBar.getVisibility() == View.VISIBLE)) {
+                Intent intent = new Intent(this, ScheduleActivity.class);
+                intent.putExtra("schedule_type", 1);
 
 
-            intent.putExtra("groupid", selectedGroupId); // id: 53 ФИИТ 3.3 расписание
-            intent.putExtra("groupname", selectedGroupName);
-            startActivity(intent);
+                intent.putExtra("groupid", selectedGroupId); // id: 53 ФИИТ 3.3 расписание
+                intent.putExtra("groupname", selectedGroupName);
+                startActivity(intent);
+            } else {
+                loadGrades();
+                showScheduleButton.setText("Загрузка...");
+            }
         }
-        else
+        else if (Objects.equals(currentScheduleMode, "Преподаватель"))
         {
-            loadGrades();
-            showScheduleButton.setText("Загрузка...");
+            Toast.makeText(this,"Not implemented!", Toast.LENGTH_LONG);
+        }
+        else if(Objects.equals(currentScheduleMode, "Аудитория"))
+        {
+            Toast.makeText(this,"Not implemented!", Toast.LENGTH_LONG);
         }
     }
 }

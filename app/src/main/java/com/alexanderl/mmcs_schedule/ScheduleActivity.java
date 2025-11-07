@@ -3,6 +3,7 @@ package com.alexanderl.mmcs_schedule;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -150,7 +151,7 @@ public class ScheduleActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     // Конвертируем raw данные в нашу модель
                     weekType = convertWeekType( response.body().getType());
-
+                    Log.i("API", "Week type loaded successfully");
                 }
             }
 
@@ -158,6 +159,7 @@ public class ScheduleActivity extends AppCompatActivity {
             public void onFailure(Call<RawWeek> call, Throwable t) {
                 //hideLoading();
                 Toast.makeText(ScheduleActivity.this, "Не удалось получить тип недели!", Toast.LENGTH_SHORT).show();
+                Log.e("API", "Week type error: " + t.getMessage());
             }
         });
 
@@ -167,34 +169,40 @@ public class ScheduleActivity extends AppCompatActivity {
         //showLoading();
 
 
-        ScheduleService.getGroupSchedule(groupid).enqueue(new Callback<RawScheduleOfGroup>() {
-            @Override
-            public void onResponse(Call<RawScheduleOfGroup> call, Response<RawScheduleOfGroup> response) {
-                //hideLoading();
+        try {
+            ScheduleService.getGroupSchedule(groupid).enqueue(new Callback<RawScheduleOfGroup>() {
+                @Override
+                public void onResponse(Call<RawScheduleOfGroup> call, Response<RawScheduleOfGroup> response) {
+                    try {
+                        if (response.isSuccessful() && response.body() != null) {
+                            response_week = response.body();
+                            Log.i("API", "Schedule loaded successfully");
 
-                if (response.isSuccessful() && response.body() != null) {
-                    // Конвертируем raw данные в нашу модель
-                    response_week = response.body();
-
-
-                    Week week1 = ScheduleAdapter.convertToWeek(response_week,weekType);
-                    String wktp = String.format("Текущая неделя:\n %s", weekType.toString());
-                    currentWeekTextView.setText(wktp);
-                    setupViewPager(week1);
-
-                } else {
-                    // Если API не доступно, используем тестовые данные
-                    useTestData();
+                            Week week1 = ScheduleAdapter.convertToWeek(response_week, weekType);
+                            String wktp = String.format("Текущая неделя:\n %s", weekType.toString());
+                            currentWeekTextView.setText(wktp);
+                            setupViewPager(week1);
+                        } else {
+                            useTestData();
+                        }
+                    } catch (Exception e) {
+                        Log.e("ScheduleActivity", "Error processing schedule response", e);
+                        useTestData();
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<RawScheduleOfGroup> call, Throwable t) {
-                // При ошибке используем тестовые данные
-                useTestData();
-                Toast.makeText(ScheduleActivity.this, "Используются тестовые данные", Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onFailure(Call<RawScheduleOfGroup> call, Throwable t) {
+                    Log.e("API", "Schedule error: " + t.getMessage());
+                    useTestData();
+                    Toast.makeText(ScheduleActivity.this, "Используются тестовые данные", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        catch (Exception e) {
+            Log.e("ScheduleActivity", "Error loading schedule from API", e);
+            useTestData();
+        }
     }
 
     @Override
@@ -328,23 +336,33 @@ public class ScheduleActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("CURRENT_DAY", viewPager.getCurrentItem());
+
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        int currentDay = savedInstanceState.getInt("CURRENT_DAY", 0);
-        viewPager.setCurrentItem(currentDay, false);
+        try {
+            super.onRestoreInstanceState(savedInstanceState);
+            int currentDay = savedInstanceState.getInt("CURRENT_DAY", 0);
+            viewPager.setCurrentItem(currentDay, false);
+        } catch (Exception e) {
+            Log.e("ScheduleActivity", "Error in onRestoreInstanceState", e);
+        }
     }
 
     public void goBackToChangeSchedulePage(View view)
     {
 
-        prefsManager.clearSelectedGroup();
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
+        try {
+            prefsManager.clearSelectedGroup();
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        } catch (Exception e) {
+            Log.e("ScheduleActivity", "Error going back to main", e);
+            finish();
+        }
 
     }
 

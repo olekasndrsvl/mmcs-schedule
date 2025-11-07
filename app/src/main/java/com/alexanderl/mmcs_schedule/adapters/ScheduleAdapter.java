@@ -195,7 +195,6 @@ public class ScheduleAdapter {
         List<Integer> sorted = new ArrayList<>(subGroups);
         Collections.sort(sorted);
 
-        // Пытаемся найти последовательности
         List<String> ranges = new ArrayList<>();
         int start = sorted.get(0);
         int end = start;
@@ -223,7 +222,7 @@ public class ScheduleAdapter {
         return String.join(",", ranges);
     }
 
-    // Остальные методы остаются без изменений
+
     private static TimeslotData parseTimeslot(String timeslot) {
         if (timeslot == null || !timeslot.startsWith("(") || !timeslot.endsWith(")")) {
             return null;
@@ -300,3 +299,4 @@ public class ScheduleAdapter {
         }
     }
 }
+// https://schedule.sfedu.ru/APIv0/schedule/group/1
