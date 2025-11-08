@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -15,9 +16,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.alexanderl.mmcs_schedule.API.primitives.RawGrade;
 import com.alexanderl.mmcs_schedule.API.primitives.RawGroup;
+import com.alexanderl.mmcs_schedule.API.primitives.RawTeacher;
 import com.alexanderl.mmcs_schedule.API.primitives.ScheduleService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +51,18 @@ public class MainActivity extends AppCompatActivity {
     private String selectedGroupName;
     private PreferencesManager prefsManager;
 
+    // Преподавательское
+    private LinearLayout layoutGroupContainer;
+    private LinearLayout layoutTeacherContainer;
+    private List<String> teacherList = new ArrayList<>();
+    private List<RawTeacher> rawTeachers = new ArrayList<>();
+    private Map<String, Integer> teacherDict = new HashMap<>();
+    private ArrayAdapter<String> adapter_teachers;
+    private Spinner spinnerTeacher;
+    private int selectedTeacherId;
+    private String selectedTeacherName;
+    private ProgressBar loadingTeachersProgressBar;
+
     Map<String,Integer> grades_dict = new Hashtable<String, Integer>();
     Map<String,Integer> group_dict = new Hashtable<String, Integer>();
     @Override
@@ -57,11 +72,16 @@ public class MainActivity extends AppCompatActivity {
 
         // Проверяем, была ли выбрана группа ранее
         if (prefsManager.isGroupSelected()) {
-            // Если группа выбрана, сразу переходим к ScheduleActivity
-            goToScheduleActivity();
+            goToScheduleActivityForGroup();
             return;
         }
-        
+
+        // Проверяем, был ли выбран преподаватель ранее
+        if (prefsManager.isTeacherSelected()) {
+            goToScheduleActivityForTeacher();
+            return;
+        }
+
         setContentView(R.layout.activity_main);
 
         Spinner spinner_mode = findViewById(R.id.spinner_mode);
@@ -75,13 +95,18 @@ public class MainActivity extends AppCompatActivity {
         adapter_modes = new ArrayAdapter<>(this, R.layout.spinner_item_top, modesSchedule);
         adapter_modes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-
         showScheduleButton = findViewById(R.id.open_schedule_button);
         Spinner spinner1 = findViewById(R.id.spinner2);
         Spinner spinner = findViewById(R.id.spinner_group);
+        Spinner spinner_teacher = findViewById(R.id.spinner_teacher);
 
         loadingGradesProgressBar = findViewById(R.id.progress_bar_direction);
-        loadingGroupsProgressBar= findViewById(R.id.progress_bar_group);
+        loadingGroupsProgressBar = findViewById(R.id.progress_bar_group);
+        loadingTeachersProgressBar = findViewById(R.id.progress_bar_teacher);
+
+        // Инициализация layout контейнеров
+        layoutGroupContainer = findViewById(R.id.layout_group_container);
+        layoutTeacherContainer = findViewById(R.id.layout_teacher_container);
 
         adapter_courses = new ArrayAdapter<>(this, R.layout.spinner_item, gradeList);
         adapter_courses.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -89,41 +114,40 @@ public class MainActivity extends AppCompatActivity {
         adapter_groups = new ArrayAdapter<>(this, R.layout.spinner_item, groupList);
         adapter_groups.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-
+        adapter_teachers = new ArrayAdapter<>(this, R.layout.spinner_item, teacherList);
+        adapter_teachers.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         spinner1.setAdapter(adapter_courses);
         spinner.setAdapter(adapter_groups);
+        spinner_teacher.setAdapter(adapter_teachers);
         spinner_mode.setAdapter(adapter_modes);
-        loadingGradesProgressBar.setVisibility(View.VISIBLE);
 
+        loadingGradesProgressBar.setVisibility(View.VISIBLE);
         loadGrades();
-        loadingGroupsProgressBar.setVisibility(View.VISIBLE);
+
+        // Слушатель для режима расписания
         AdapterView.OnItemSelectedListener itemSelectedListener_mode = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                // Получаем выбранный объект
                 String item = (String)parent.getItemAtPosition(position);
-                Log.i("USER_CHOICE_MODE",item);
-                Toast.makeText(MainActivity.this,"Selected!",Toast.LENGTH_LONG);
-                currentScheduleMode=item;
+                Log.i("USER_CHOICE_MODE", item);
+                currentScheduleMode = item;
+                updateUIForScheduleMode(item);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                loadGroups(1);
+                updateUIForScheduleMode("Группа");
             }
         };
         spinner_mode.setOnItemSelectedListener(itemSelectedListener_mode);
 
+        // Слушатель для курсов
         AdapterView.OnItemSelectedListener itemSelectedListener_course = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                // Получаем выбранный объект
                 String item = (String)parent.getItemAtPosition(position);
-                Log.i("USER_CHOICE_COURSE",item);
-                //Toast.makeText(MainActivity.this,"Selected!",Toast.LENGTH_LONG);
+                Log.i("USER_CHOICE_COURSE", item);
                 int id_g = grades_dict.get(item);
                 loadGroups(id_g);
             }
@@ -139,24 +163,36 @@ public class MainActivity extends AppCompatActivity {
         AdapterView.OnItemSelectedListener itemSelectedListener_group = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                // Получаем выбранный объект
                 String item = (String)parent.getItemAtPosition(position);
-                Log.i("USER_CHOICE_GROUP",item);
-                //Toast.makeText(MainActivity.this,"Selected!",Toast.LENGTH_LONG);
+                Log.i("USER_CHOICE_GROUP", item);
                 selectedGroupId = group_dict.get(item);
-                selectedGroupName= item;
+                selectedGroupName = item;
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         };
         spinner.setOnItemSelectedListener(itemSelectedListener_group);
+
+
+        AdapterView.OnItemSelectedListener itemSelectedListener_teacher = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String item = (String)parent.getItemAtPosition(position);
+                Log.i("USER_CHOICE_TEACHER", item);
+                selectedTeacherId = teacherDict.get(item);
+                selectedTeacherName = item;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        };
+        spinner_teacher.setOnItemSelectedListener(itemSelectedListener_teacher);
     }
 
-    private void goToScheduleActivity() {
+    private void goToScheduleActivityForGroup() {
         Intent intent = new Intent(this, ScheduleActivity.class);
         intent.putExtra("groupid", prefsManager.getSelectedGroupId());
         intent.putExtra("groupname", prefsManager.getSelectedGroupName());
@@ -166,6 +202,39 @@ public class MainActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
+    }
+
+    private void goToScheduleActivityForTeacher(){
+        Intent intent = new Intent(this, ScheduleActivity.class);
+        intent.putExtra("teacherId", prefsManager.getSelectedTeacherId());
+        intent.putExtra("teachername", prefsManager.getSelectedTeacherName());
+        intent.putExtra("schedule_type", 2);
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void updateUIForScheduleMode(String mode){
+        switch (mode){
+            case "Группа":
+                layoutGroupContainer.setVisibility(View.VISIBLE);
+                layoutTeacherContainer.setVisibility(View.GONE);
+                break;
+
+            case "Преподаватель":
+                layoutGroupContainer.setVisibility(View.GONE);
+                layoutTeacherContainer.setVisibility(View.VISIBLE);
+                if (teacherList.isEmpty())
+                    loadTeachers();
+                break;
+
+            case "Аудитория":
+                layoutGroupContainer.setVisibility(View.GONE);
+                layoutTeacherContainer.setVisibility(View.GONE);
+                Toast.makeText(this, "Режим аудитории пока не реализован", Toast.LENGTH_SHORT).show();
+                break;
+        }
     }
 
     private void loadGrades() {
@@ -231,6 +300,38 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void loadTeachers() {
+        loadingTeachersProgressBar.setVisibility(View.VISIBLE);
+        Call<RawTeacher.List> call = ScheduleService.getTeachers();
+        Log.i("API", "Waiting response for teachers....");
+        call.enqueue(new Callback<RawTeacher.List>() {
+            @Override
+            public void onResponse(Call<RawTeacher.List> call, Response<RawTeacher.List> response) {
+                loadingTeachersProgressBar.setVisibility(View.INVISIBLE);
+                if (response.isSuccessful()) {
+                    RawTeacher.List teachers = response.body();
+                    if (teachers != null && !teachers.isEmpty()) {
+                        processTeachers(teachers);
+                        Log.i("API", "Teachers loaded successfully");
+                    } else {
+                        showError("Нет данных о преподавателях");
+                        Log.e("API", "No teachers found");
+                    }
+                } else {
+                    showError("Ошибка сервера: " + response.code());
+                    Log.e("API", "Server error: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RawTeacher.List> call, Throwable t) {
+                loadingTeachersProgressBar.setVisibility(View.INVISIBLE);
+                showError("Ошибка сети: " + t.getMessage());
+                Log.e("API", "Teachers load error: " + t.getMessage());
+            }
+        });
+    }
+
 
     private void processGroups(List<RawGroup> groups)
     {
@@ -264,6 +365,32 @@ public class MainActivity extends AppCompatActivity {
         }
         adapter_courses.notifyDataSetChanged();
         loadingGradesProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private void processTeachers(List<RawTeacher> teachers) {
+        rawTeachers.clear();
+        rawTeachers.addAll(teachers);
+
+        teacherList.clear();
+        teacherDict.clear();
+
+        for (RawTeacher teacher : teachers) {
+            String displayName = formatTeacherName(teacher);
+            teacherList.add(displayName);
+            teacherDict.put(displayName, teacher.getId());
+        }
+
+        adapter_teachers.notifyDataSetChanged();
+
+        // Автоматически выбираем первого преподавателя
+        if (!teacherList.isEmpty()) {
+            selectedTeacherId = rawTeachers.get(0).getId();
+            selectedTeacherName = teacherList.get(0);
+        }
+    }
+
+    private String formatTeacherName(RawTeacher teacher) {
+        return teacher.getDegree() + " " + teacher.getName();
     }
 
     private String getDisplayText(RawGrade grade) {

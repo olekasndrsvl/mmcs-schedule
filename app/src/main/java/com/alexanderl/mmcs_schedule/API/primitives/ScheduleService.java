@@ -30,4 +30,5 @@ public class ScheduleService {
     {
         return api.getCurrentWeek();
     }
+    public static Call<RawTeacher.List> getTeachers(){ return api.getTeachers(); }
 }
