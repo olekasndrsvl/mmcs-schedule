@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void goToScheduleActivityForTeacher(){
         Intent intent = new Intent(this, ScheduleActivity.class);
-        intent.putExtra("teacherId", prefsManager.getSelectedTeacherId());
+        intent.putExtra("teacherid", prefsManager.getSelectedTeacherId());
         intent.putExtra("teachername", prefsManager.getSelectedTeacherName());
         intent.putExtra("schedule_type", 2);
 
@@ -430,7 +430,16 @@ public class MainActivity extends AppCompatActivity {
         }
         else if (Objects.equals(currentScheduleMode, "Преподаватель"))
         {
-            Toast.makeText(this,"Not implemented!", Toast.LENGTH_LONG);
+            if(!(loadingTeachersProgressBar.getVisibility() == View.VISIBLE)) {
+                if(!teacherList.isEmpty()){
+                    Intent intent = new Intent(this, ScheduleActivity.class);
+                    intent.putExtra("schedule_type", 2);
+                    intent.putExtra("teacherid", selectedTeacherId);
+                    intent.putExtra("teachername", selectedTeacherName);
+                    startActivity(intent);
+                }
+                else showError("Список преподавателей пуст");
+            }
         }
         else if(Objects.equals(currentScheduleMode, "Аудитория"))
         {
