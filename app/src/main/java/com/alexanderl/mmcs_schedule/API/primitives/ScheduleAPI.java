@@ -18,6 +18,9 @@ public interface ScheduleAPI {
     @GET("/APIv0/room/list")
     Call<RawRoom.List> getRooms();
 
+    @GET("/APIv1/schedule/room/{ID}")
+    Call<RawScheduleOfRoom> getScheduleOfRoom(@Path("ID") int id);
+
     @GET("/APIv0/schedule/lesson/{ID}")
     Call<RawCurriculaOfLesson> getCurriculaForLesson(@Path("ID") int id);
 

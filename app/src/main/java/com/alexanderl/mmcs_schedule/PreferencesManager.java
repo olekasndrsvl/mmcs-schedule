@@ -12,6 +12,10 @@ public class PreferencesManager {
     private static final String KEY_TEACHER_NAME = "selected_teacher_name";
     private static final String KEY_TEACHER_SELECTED = "teacher_selected";
 
+    private static final String KEY_ROOM_NAME = "selected_room_name";
+    private static final String KEY_ROOM_ID = "selected_room_id";
+    private static final String KEY_ROOM_SELECTED = "room_selected";
+
     private SharedPreferences prefs;
 
     public PreferencesManager(Context context) {
@@ -25,6 +29,7 @@ public class PreferencesManager {
         editor.putBoolean(KEY_GROUP_SELECTED, true);
         // Сбрасываем выбор преподавателя при выборе группы
         editor.putBoolean(KEY_TEACHER_SELECTED, false);
+        editor.putBoolean(KEY_ROOM_SELECTED, false);
         editor.apply();
     }
 
@@ -35,9 +40,21 @@ public class PreferencesManager {
         editor.putBoolean(KEY_TEACHER_SELECTED, true);
         // Сбрасываем выбор группы при выборе преподавателя
         editor.putBoolean(KEY_GROUP_SELECTED, false);
+        editor.putBoolean(KEY_ROOM_SELECTED, false);
         editor.apply();
     }
 
+    public void saveSelectedRoom(int roomId, String roomName)
+    {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_ROOM_ID, roomId);
+        editor.putString(KEY_ROOM_NAME, roomName);
+        editor.putBoolean(KEY_ROOM_SELECTED, true);
+        // Сбрасываем выбор группы при выборе аудитории
+        editor.putBoolean(KEY_GROUP_SELECTED, false);
+        editor.putBoolean(KEY_TEACHER_SELECTED, false);
+        editor.apply();
+    }
     public int getSelectedGroupId() {
         return prefs.getInt(KEY_GROUP_ID, 1);
     }
@@ -54,6 +71,10 @@ public class PreferencesManager {
         return prefs.getString(KEY_TEACHER_NAME, "<teacher>");
     }
 
+    public int getSelectedRoomId() {return prefs.getInt(KEY_ROOM_ID,1);}
+
+    public String getSelectedRoomName() {return prefs.getString(KEY_ROOM_SELECTED,"<room>");}
+
     public boolean isGroupSelected() {
         return prefs.getBoolean(KEY_GROUP_SELECTED, false);
     }
@@ -62,6 +83,7 @@ public class PreferencesManager {
         return prefs.getBoolean(KEY_TEACHER_SELECTED, false);
     }
 
+    public boolean isRoomSelected(){return prefs.getBoolean(KEY_ROOM_SELECTED,false);}
     public void clearSelectedGroup() {
         SharedPreferences.Editor editor = prefs.edit();
         editor.remove(KEY_GROUP_ID);
@@ -75,6 +97,14 @@ public class PreferencesManager {
         editor.remove(KEY_TEACHER_ID);
         editor.remove(KEY_TEACHER_NAME);
         editor.putBoolean(KEY_TEACHER_SELECTED, false);
+        editor.apply();
+    }
+    public void clearSelectedRoom()
+    {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove(KEY_ROOM_ID);
+        editor.remove(KEY_ROOM_NAME);
+        editor.putBoolean(KEY_ROOM_SELECTED, false);
         editor.apply();
     }
 }

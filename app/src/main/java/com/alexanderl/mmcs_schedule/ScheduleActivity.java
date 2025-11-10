@@ -62,7 +62,7 @@ public class ScheduleActivity extends AppCompatActivity {
 
         Bundle arguments = getIntent().getExtras();
         if(arguments != null) {
-            scheduleType = arguments.getInt("schedule_type", 1);
+            scheduleType = arguments.getInt("schedule_type", 0);
 
             if (scheduleType == 1) {
                 entityId = arguments.getInt("groupid", prefsManager.getSelectedGroupId());
@@ -93,7 +93,15 @@ public class ScheduleActivity extends AppCompatActivity {
                 entityId = prefsManager.getSelectedTeacherId();
                 entityName = prefsManager.getSelectedTeacherName();
                 entityNameTextView.setVisibility(View.GONE);
-            } else {
+            }
+            else if(prefsManager.isGroupSelected())
+            {
+                scheduleType = 3;
+                entityId = prefsManager.getSelectedRoomId();
+                entityName = prefsManager.getSelectedRoomName();
+                entityNameTextView.setVisibility(View.GONE);
+            }
+            else {
                 goBackToMain();
                 return;
             }

@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.alexanderl.mmcs_schedule.API.primitives.RawGrade;
 import com.alexanderl.mmcs_schedule.API.primitives.RawGroup;
+import com.alexanderl.mmcs_schedule.API.primitives.RawRoom;
 import com.alexanderl.mmcs_schedule.API.primitives.RawTeacher;
 import com.alexanderl.mmcs_schedule.API.primitives.ScheduleService;
 
@@ -58,10 +59,20 @@ public class MainActivity extends AppCompatActivity {
     private List<RawTeacher> rawTeachers = new ArrayList<>();
     private Map<String, Integer> teacherDict = new HashMap<>();
     private ArrayAdapter<String> adapter_teachers;
-    private Spinner spinnerTeacher;
     private int selectedTeacherId;
     private String selectedTeacherName;
     private ProgressBar loadingTeachersProgressBar;
+
+    // Аудиторное
+    private LinearLayout layoutRoomContianer;
+    private List<String> roomList = new ArrayList<>();
+    private List<RawRoom> rawRooms = new ArrayList<>();
+    private Map<String,Integer> roomDict = new HashMap<>();
+    private ArrayAdapter<String> adapter_rooms;
+    private String selectedRoomName;
+    private int selectedRoomId;
+    private ProgressBar loadingRoomsProgressBar;
+
 
     Map<String,Integer> grades_dict = new Hashtable<String, Integer>();
     Map<String,Integer> group_dict = new Hashtable<String, Integer>();
@@ -79,6 +90,12 @@ public class MainActivity extends AppCompatActivity {
         // Проверяем, был ли выбран преподаватель ранее
         if (prefsManager.isTeacherSelected()) {
             goToScheduleActivityForTeacher();
+            return;
+        }
+        // Проверяем, была ли выбрана аудитория ранее
+        if (prefsManager.isRoomSelected())
+        {
+            goToScheduleActivityForRoom();
             return;
         }
 
@@ -99,14 +116,17 @@ public class MainActivity extends AppCompatActivity {
         Spinner spinner1 = findViewById(R.id.spinner2);
         Spinner spinner = findViewById(R.id.spinner_group);
         Spinner spinner_teacher = findViewById(R.id.spinner_teacher);
+        Spinner spinner_room = findViewById(R.id.spinner_room);
 
         loadingGradesProgressBar = findViewById(R.id.progress_bar_direction);
         loadingGroupsProgressBar = findViewById(R.id.progress_bar_group);
         loadingTeachersProgressBar = findViewById(R.id.progress_bar_teacher);
+        loadingRoomsProgressBar = findViewById(R.id.progress_bar_room);
 
         // Инициализация layout контейнеров
         layoutGroupContainer = findViewById(R.id.layout_group_container);
         layoutTeacherContainer = findViewById(R.id.layout_teacher_container);
+        layoutRoomContianer = findViewById(R.id.layout_room_container);
 
         adapter_courses = new ArrayAdapter<>(this, R.layout.spinner_item, gradeList);
         adapter_courses.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -117,14 +137,14 @@ public class MainActivity extends AppCompatActivity {
         adapter_teachers = new ArrayAdapter<>(this, R.layout.spinner_item, teacherList);
         adapter_teachers.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
+        adapter_rooms = new ArrayAdapter<>(this, R.layout.spinner_item, roomList);
+        adapter_rooms.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         spinner1.setAdapter(adapter_courses);
         spinner.setAdapter(adapter_groups);
         spinner_teacher.setAdapter(adapter_teachers);
         spinner_mode.setAdapter(adapter_modes);
-
-        loadingGradesProgressBar.setVisibility(View.VISIBLE);
-        loadGrades();
-
+        spinner_room.setAdapter(adapter_rooms);
         // Слушатель для режима расписания
         AdapterView.OnItemSelectedListener itemSelectedListener_mode = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -190,6 +210,27 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         spinner_teacher.setOnItemSelectedListener(itemSelectedListener_teacher);
+
+
+        AdapterView.OnItemSelectedListener itemSelectedListener_room = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String item = (String)parent.getItemAtPosition(position);
+                Log.i("USER_CHOICE_ROOM", item);
+                selectedRoomId = roomDict.get(item);
+                selectedRoomName = item;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        };
+        spinner_room.setOnItemSelectedListener(itemSelectedListener_room);
+
+        loadingGradesProgressBar.setVisibility(View.VISIBLE);
+        loadGrades();
+
+
     }
 
     private void goToScheduleActivityForGroup() {
@@ -215,15 +256,29 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    private void goToScheduleActivityForRoom()
+    {
+        Intent intent = new Intent(this, ScheduleActivity.class);
+        intent.putExtra("teacherid", prefsManager.getSelectedTeacherId());
+        intent.putExtra("teachername", prefsManager.getSelectedTeacherName());
+        intent.putExtra("schedule_type", 3);
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     private void updateUIForScheduleMode(String mode){
         switch (mode){
             case "Группа":
                 layoutGroupContainer.setVisibility(View.VISIBLE);
+                layoutRoomContianer.setVisibility(View.GONE);
                 layoutTeacherContainer.setVisibility(View.GONE);
                 break;
 
             case "Преподаватель":
                 layoutGroupContainer.setVisibility(View.GONE);
+                layoutRoomContianer.setVisibility(View.GONE);
                 layoutTeacherContainer.setVisibility(View.VISIBLE);
                 if (teacherList.isEmpty())
                     loadTeachers();
@@ -232,7 +287,9 @@ public class MainActivity extends AppCompatActivity {
             case "Аудитория":
                 layoutGroupContainer.setVisibility(View.GONE);
                 layoutTeacherContainer.setVisibility(View.GONE);
-                Toast.makeText(this, "Режим аудитории пока не реализован", Toast.LENGTH_SHORT).show();
+                layoutRoomContianer.setVisibility(View.VISIBLE);
+
+                    loadRooms();
                 break;
         }
     }
@@ -332,6 +389,60 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void loadRooms()
+    {
+        Call<RawRoom.List> call = ScheduleService.getRooms();
+        Log.i("API", "Waiting response for rooms....");
+        call.enqueue(new Callback<RawRoom.List>() {
+            @Override
+            public void onResponse(Call<RawRoom.List> call, Response<RawRoom.List> response) {
+                loadingRoomsProgressBar.setVisibility(View.INVISIBLE);
+                if (response.isSuccessful()) {
+                    RawRoom.List rooms = response.body();
+                    if (rooms != null && !rooms.isEmpty()) {
+                        processRooms(rooms);
+                        Log.i("API", "Rooms loaded successfully");
+                    } else {
+                        showError("Нет данных о аудиториях");
+                        Log.e("API", "No rooms found");
+                    }
+                } else {
+                    showError("Ошибка сервера: " + response.code());
+                    Log.e("API", "Server error: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RawRoom.List> call, Throwable t) {
+                loadingRoomsProgressBar.setVisibility(View.INVISIBLE);
+                showError("Ошибка сети: " + t.getMessage());
+                Log.e("API", "Rooms load error: " + t.getMessage());
+            }
+        });
+    }
+
+    private void processRooms(List<RawRoom> rooms)
+    {
+        rawRooms.clear();
+        rawRooms.addAll(rooms);
+
+        roomList.clear();
+        roomDict.clear();
+
+        for (RawRoom room : rooms) {
+            String displayName = formatRoomName(room);
+            roomList.add(displayName);
+            roomDict.put(displayName, room.getId());
+        }
+
+        adapter_rooms.notifyDataSetChanged();
+
+        // Автоматически выбираем первого преподавателя
+        if (!roomList.isEmpty()) {
+            selectedRoomId = rawRooms.get(0).getId();
+            selectedRoomName = roomList.get(0);
+        }
+    }
 
     private void processGroups(List<RawGroup> groups)
     {
@@ -393,6 +504,11 @@ public class MainActivity extends AppCompatActivity {
         return teacher.getDegree() + " " + teacher.getName();
     }
 
+    private String formatRoomName(RawRoom room)
+    {
+        return room.getName();
+    }
+
     private String getDisplayText(RawGrade grade) {
         switch (grade.getDegree()) {
             case BACHELOR:
@@ -443,7 +559,17 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(Objects.equals(currentScheduleMode, "Аудитория"))
         {
-            Toast.makeText(this,"Not implemented!", Toast.LENGTH_LONG);
+            if(!(loadingRoomsProgressBar.getVisibility() == View.VISIBLE))
+            {
+                if(!roomList.isEmpty()){
+                    Intent intent = new Intent(this, ScheduleActivity.class);
+                    intent.putExtra("schedule_type", 3);
+                    intent.putExtra("roomid", selectedRoomId);
+                    intent.putExtra("roomname", selectedRoomName);
+                    startActivity(intent);
+                }
+                else showError("Список аудиторий пуст");
+            }
         }
     }
 }

@@ -23,6 +23,12 @@ public class ScheduleService {
     public static Call<RawScheduleOfTeacher> getTeacherSchedule(int teacherId){
         return api.getScheduleOfTeacher(teacherId);
     }
+
+    public static Call<RawScheduleOfRoom> getRoomSchedule(int roomId)
+    {
+        return api.getScheduleOfRoom(roomId);
+    }
+
     public static Call<RawGrade.List> getGrades() {
         return api.getGrades();
     }
@@ -34,4 +40,5 @@ public class ScheduleService {
         return api.getCurrentWeek();
     }
     public static Call<RawTeacher.List> getTeachers(){ return api.getTeachers(); }
+    public static Call<RawRoom.List> getRooms() {return api.getRooms();}
 }

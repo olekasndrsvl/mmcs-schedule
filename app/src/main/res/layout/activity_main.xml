@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="?attr/appBackground">
+        android:background="?attr/appBackground"
+        tools:ignore="ExtraText">
 
         <TextView
             android:id="@+id/textView"
@@ -178,7 +179,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/rounded_up_corners"
+                android:background="@drawable/rounded_all"
                 android:orientation="horizontal"
                 android:layout_marginHorizontal="4dp"
                 android:paddingVertical="8dp">
@@ -220,6 +221,62 @@
                 </RelativeLayout>
             </LinearLayout>
         </LinearLayout>>
+
+        <!-- Контейнер для выбора аудитории -->
+        <LinearLayout
+            android:id="@+id/layout_room_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- Аудитория -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_all"
+                android:orientation="horizontal"
+                android:layout_marginHorizontal="4dp"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:id="@+id/textView_room"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="8dp"
+                    android:fontFamily="@font/jetbrains_mono_bold"
+                    android:text="Аудитория:"
+                    android:textColor="@color/black"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="12dp">
+
+                    <Spinner
+                        android:id="@+id/spinner_room"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minWidth="120dp" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar_room"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:indeterminateTint="@color/foreground"
+                        android:layout_centerInParent="true"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+            </LinearLayout>
+        </LinearLayout>>
+
 
         <!-- Кнопка -->
         <Button
