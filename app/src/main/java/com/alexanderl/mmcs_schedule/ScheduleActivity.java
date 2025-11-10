@@ -19,12 +19,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.alexanderl.mmcs_schedule.API.primitives.RawScheduleOfGroup;
+import com.alexanderl.mmcs_schedule.API.primitives.RawScheduleOfRoom;
 import com.alexanderl.mmcs_schedule.API.primitives.RawScheduleOfTeacher;
 import com.alexanderl.mmcs_schedule.API.primitives.RawWeek;
 import com.alexanderl.mmcs_schedule.API.primitives.ScheduleService;
 import com.alexanderl.mmcs_schedule.adapters.DayPageAdapter;
 import com.alexanderl.mmcs_schedule.adapters.ScheduleAdapter;
 import com.alexanderl.mmcs_schedule.adapters.TeacherScheduleAdapter;
+import com.alexanderl.mmcs_schedule.adapters.RoomScheduleAdapter;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.Lesson;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.Room;
 import com.alexanderl.mmcs_schedule.dataTransferObjects.Teacher;
@@ -65,6 +67,7 @@ public class ScheduleActivity extends AppCompatActivity {
             scheduleType = arguments.getInt("schedule_type", 0);
 
             if (scheduleType == 1) {
+                // Group schedule
                 entityId = arguments.getInt("groupid", prefsManager.getSelectedGroupId());
                 entityName = arguments.getString("groupname", prefsManager.getSelectedGroupName());
                 if (arguments.containsKey("groupid")) {
@@ -73,15 +76,26 @@ public class ScheduleActivity extends AppCompatActivity {
                 entityNameTextView.setText(entityName);
                 entityNameTextView.setVisibility(View.VISIBLE);
             } else if (scheduleType == 2) {
+                // Teacher schedule
                 entityId = arguments.getInt("teacherid", prefsManager.getSelectedTeacherId());
                 entityName = arguments.getString("teachername", prefsManager.getSelectedTeacherName());
                 if (arguments.containsKey("teacherid")) {
                     prefsManager.saveSelectedTeacher(entityId, entityName);
                 }
-                entityName = "   ";
+                entityNameTextView.setText(entityName);
+                entityNameTextView.setVisibility(View.VISIBLE);
+            } else if (scheduleType == 3) {
+                // Room schedule
+                entityId = arguments.getInt("roomid", prefsManager.getSelectedRoomId());
+                entityName = arguments.getString("roomname", prefsManager.getSelectedRoomName());
+                if (arguments.containsKey("roomid")) {
+                    prefsManager.saveSelectedRoom(entityId, entityName);
+                }
+                entityNameTextView.setText(entityName);
                 entityNameTextView.setVisibility(View.VISIBLE);
             }
         } else {
+            // No intent extras, check preferences
             if (prefsManager.isGroupSelected()) {
                 scheduleType = 1;
                 entityId = prefsManager.getSelectedGroupId();
@@ -92,22 +106,20 @@ public class ScheduleActivity extends AppCompatActivity {
                 scheduleType = 2;
                 entityId = prefsManager.getSelectedTeacherId();
                 entityName = prefsManager.getSelectedTeacherName();
-                entityNameTextView.setVisibility(View.GONE);
-            }
-            else if(prefsManager.isGroupSelected())
-            {
+                entityNameTextView.setText(entityName);
+                entityNameTextView.setVisibility(View.VISIBLE);
+            } else if (prefsManager.isRoomSelected()) {
                 scheduleType = 3;
                 entityId = prefsManager.getSelectedRoomId();
                 entityName = prefsManager.getSelectedRoomName();
-                entityNameTextView.setVisibility(View.GONE);
-            }
-            else {
+                entityNameTextView.setText(entityName);
+                entityNameTextView.setVisibility(View.VISIBLE);
+            } else {
                 goBackToMain();
                 return;
             }
         }
 
-        entityNameTextView.setText(entityName);
         getCurrentWeekType();
         loadScheduleFromAPI(entityId, scheduleType);
 
@@ -154,10 +166,15 @@ public class ScheduleActivity extends AppCompatActivity {
     }
 
     private Week getWeekForType(WeekType weekType) {
-        if (scheduleType == 1) {
-            return ScheduleAdapter.convertToWeek((RawScheduleOfGroup) response_week, weekType);
-        } else {
-            return TeacherScheduleAdapter.convertToWeek((RawScheduleOfTeacher) response_week, weekType);
+        switch (scheduleType) {
+            case 1: // Group
+                return ScheduleAdapter.convertToWeek((RawScheduleOfGroup) response_week, weekType);
+            case 2: // Teacher
+                return TeacherScheduleAdapter.convertToWeek((RawScheduleOfTeacher) response_week, weekType);
+            case 3: // Room
+                return RoomScheduleAdapter.convertToWeek((RawScheduleOfRoom) response_week, weekType);
+            default:
+                return TestWeekBuilder.createTestWeek();
         }
     }
 
@@ -189,68 +206,102 @@ public class ScheduleActivity extends AppCompatActivity {
 
     private void loadScheduleFromAPI(int entityId, int scheduleType) {
         try {
-            if (scheduleType == 1) {
-                // Для групп
-                Call<RawScheduleOfGroup> call = ScheduleService.getGroupSchedule(entityId);
-                call.enqueue(new Callback<RawScheduleOfGroup>() {
-                    @Override
-                    public void onResponse(Call<RawScheduleOfGroup> call, Response<RawScheduleOfGroup> response) {
-                        try {
-                            if (response.isSuccessful() && response.body() != null) {
-                                response_week = response.body();
-                                Log.i("API", "Group schedule loaded successfully");
+            switch (scheduleType) {
+                case 1: // Group schedule
+                    Call<RawScheduleOfGroup> groupCall = ScheduleService.getGroupSchedule(entityId);
+                    groupCall.enqueue(new Callback<RawScheduleOfGroup>() {
+                        @Override
+                        public void onResponse(Call<RawScheduleOfGroup> call, Response<RawScheduleOfGroup> response) {
+                            try {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    response_week = response.body();
+                                    Log.i("API", "Group schedule loaded successfully");
 
-                                Week week1 = ScheduleAdapter.convertToWeek((RawScheduleOfGroup) response_week, weekType);
-                                String wktp = String.format("Текущая неделя:\n %s", weekType.toString());
-                                currentWeekTextView.setText(wktp);
-                                setupViewPager(week1);
-                            } else {
+                                    Week week1 = ScheduleAdapter.convertToWeek((RawScheduleOfGroup) response_week, weekType);
+                                    String wktp = String.format("Текущая неделя:\n %s", weekType.toString());
+                                    currentWeekTextView.setText(wktp);
+                                    setupViewPager(week1);
+                                } else {
+                                    useTestData();
+                                }
+                            } catch (Exception e) {
+                                Log.e("ScheduleActivity", "Error processing group schedule response", e);
                                 useTestData();
                             }
-                        } catch (Exception e) {
-                            Log.e("ScheduleActivity", "Error processing group schedule response", e);
-                            useTestData();
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Call<RawScheduleOfGroup> call, Throwable t) {
-                        Log.e("API", "Group schedule error: " + t.getMessage());
-                        useTestData();
-                        Toast.makeText(ScheduleActivity.this, "Используются тестовые данные", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            } else {
-                // Для преподавателей
-                Call<RawScheduleOfTeacher> call = ScheduleService.getTeacherSchedule(entityId);
-                call.enqueue(new Callback<RawScheduleOfTeacher>() {
-                    @Override
-                    public void onResponse(Call<RawScheduleOfTeacher> call, Response<RawScheduleOfTeacher> response) {
-                        try {
-                            if (response.isSuccessful() && response.body() != null) {
-                                response_week = response.body();
-                                Log.i("API", "Teacher schedule loaded successfully");
+                        @Override
+                        public void onFailure(Call<RawScheduleOfGroup> call, Throwable t) {
+                            Log.e("API", "Group schedule error: " + t.getMessage());
+                            useTestData();
+                            Toast.makeText(ScheduleActivity.this, "Используются тестовые данные", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    break;
 
-                                Week week1 = TeacherScheduleAdapter.convertToWeek((RawScheduleOfTeacher) response_week, weekType);
-                                String wktp = String.format("Текущая неделя:\n %s", weekType.toString());
-                                currentWeekTextView.setText(wktp);
-                                setupViewPager(week1);
-                            } else {
+                case 2: // Teacher schedule
+                    Call<RawScheduleOfTeacher> teacherCall = ScheduleService.getTeacherSchedule(entityId);
+                    teacherCall.enqueue(new Callback<RawScheduleOfTeacher>() {
+                        @Override
+                        public void onResponse(Call<RawScheduleOfTeacher> call, Response<RawScheduleOfTeacher> response) {
+                            try {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    response_week = response.body();
+                                    Log.i("API", "Teacher schedule loaded successfully");
+
+                                    Week week1 = TeacherScheduleAdapter.convertToWeek((RawScheduleOfTeacher) response_week, weekType);
+                                    String wktp = String.format("Текущая неделя:\n %s", weekType.toString());
+                                    currentWeekTextView.setText(wktp);
+                                    setupViewPager(week1);
+                                } else {
+                                    useTestData();
+                                }
+                            } catch (Exception e) {
+                                Log.e("ScheduleActivity", "Error processing teacher schedule response", e);
                                 useTestData();
                             }
-                        } catch (Exception e) {
-                            Log.e("ScheduleActivity", "Error processing teacher schedule response", e);
-                            useTestData();
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Call<RawScheduleOfTeacher> call, Throwable t) {
-                        Log.e("API", "Teacher schedule error: " + t.getMessage());
-                        useTestData();
-                        Toast.makeText(ScheduleActivity.this, "Используются тестовые данные", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        @Override
+                        public void onFailure(Call<RawScheduleOfTeacher> call, Throwable t) {
+                            Log.e("API", "Teacher schedule error: " + t.getMessage());
+                            useTestData();
+                            Toast.makeText(ScheduleActivity.this, "Используются тестовые данные", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    break;
+
+                case 3: // Room schedule
+                    Call<RawScheduleOfRoom> roomCall = ScheduleService.getRoomSchedule(entityId);
+                    roomCall.enqueue(new Callback<RawScheduleOfRoom>() {
+                        @Override
+                        public void onResponse(Call<RawScheduleOfRoom> call, Response<RawScheduleOfRoom> response) {
+                            try {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    response_week = response.body();
+                                    Log.i("API", "Room schedule loaded successfully");
+
+                                    Week week1 = RoomScheduleAdapter.convertToWeek((RawScheduleOfRoom) response_week, weekType);
+                                    String wktp = String.format("Текущая неделя:\n %s", weekType.toString());
+                                    currentWeekTextView.setText(wktp);
+                                    setupViewPager(week1);
+                                } else {
+                                    useTestData();
+                                }
+                            } catch (Exception e) {
+                                Log.e("ScheduleActivity", "Error processing room schedule response", e);
+                                useTestData();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<RawScheduleOfRoom> call, Throwable t) {
+                            Log.e("API", "Room schedule error: " + t.getMessage());
+                            useTestData();
+                            Toast.makeText(ScheduleActivity.this, "Используются тестовые данные", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    break;
             }
         } catch (Exception e) {
             Log.e("ScheduleActivity", "Error loading schedule from API", e);
@@ -270,10 +321,16 @@ public class ScheduleActivity extends AppCompatActivity {
     }
 
     private void clearSelectedEntity() {
-        if (scheduleType == 1) {
-            prefsManager.clearSelectedGroup();
-        } else {
-            prefsManager.clearSelectedTeacher();
+        switch (scheduleType) {
+            case 1:
+                prefsManager.clearSelectedGroup();
+                break;
+            case 2:
+                prefsManager.clearSelectedTeacher();
+                break;
+            case 3:
+                prefsManager.clearSelectedRoom();
+                break;
         }
     }
 
@@ -349,7 +406,6 @@ public class ScheduleActivity extends AppCompatActivity {
             roomsString.append(room.getRoomName());
         }
         tvClassroom.setText((roomsString.length() > 0 ? roomsString.toString() : "не указана"));
-
 
         btnClose.setOnClickListener(v -> popupWindow.dismiss());
 
