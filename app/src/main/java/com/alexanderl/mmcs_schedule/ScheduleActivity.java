@@ -87,7 +87,7 @@ public class ScheduleActivity extends AppCompatActivity {
             } else if (scheduleType == 3) {
                 // Room schedule
                 entityId = arguments.getInt("roomid", prefsManager.getSelectedRoomId());
-                entityName = arguments.getString("roomname", prefsManager.getSelectedRoomName());
+                entityName =arguments.getString("roomname", prefsManager.getSelectedRoomName());
                 if (arguments.containsKey("roomid")) {
                     prefsManager.saveSelectedRoom(entityId, entityName);
                 }
@@ -272,6 +272,7 @@ public class ScheduleActivity extends AppCompatActivity {
                     break;
 
                 case 3: // Room schedule
+                    Log.i("API", "Waiting response for room schedule....");
                     Call<RawScheduleOfRoom> roomCall = ScheduleService.getRoomSchedule(entityId);
                     roomCall.enqueue(new Callback<RawScheduleOfRoom>() {
                         @Override
@@ -380,32 +381,76 @@ public class ScheduleActivity extends AppCompatActivity {
         View popupView = getLayoutInflater().inflate(R.layout.popup_lesson_details, null);
 
         TextView tvSubject = popupView.findViewById(R.id.tvSubject);
+        tvSubject.setText(lesson.getCurriculaName());
+
         TextView tvTeacher = popupView.findViewById(R.id.tvTeacher);
         TextView tvTime = popupView.findViewById(R.id.tvTime);
         TextView tvClassroom = popupView.findViewById(R.id.tvClassroom);
+        TextView tvRoom= popupView.findViewById(R.id.tClassRoom);
+        TextView tvTeach = popupView.findViewById(R.id.tTeacher);
         Button btnClose = popupView.findViewById(R.id.btnClose);
-
-        tvSubject.setText(lesson.getCurriculaName());
-
-        StringBuilder teachersString = new StringBuilder();
-        for (Teacher teacher : lesson.getTeachers()) {
-            if (teachersString.length() > 0) {
-                teachersString.append("\n");
-            }
-            teachersString.append(teacher.toString());
-        }
-        tvTeacher.setText((teachersString.length() > 0 ? teachersString.toString() : "не указан"));
 
         tvTime.setText("Время: " + lesson.getTbegin() + " - " + lesson.getTend());
 
-        StringBuilder roomsString = new StringBuilder();
-        for (Room room : lesson.getRooms()) {
-            if (roomsString.length() > 0) {
-                roomsString.append(", ");
-            }
-            roomsString.append(room.getRoomName());
-        }
-        tvClassroom.setText((roomsString.length() > 0 ? roomsString.toString() : "не указана"));
+
+        switch (scheduleType)
+       {
+           case 1:
+               StringBuilder teachersString = new StringBuilder();
+               for (Teacher teacher : lesson.getTeachers()) {
+                   if (teachersString.length() > 0) {
+                       teachersString.append("\n");
+                   }
+                   teachersString.append(teacher.toString());
+               }
+               tvTeacher.setText((teachersString.length() > 0 ? teachersString.toString() : "не указан"));
+
+
+               StringBuilder roomsString = new StringBuilder();
+               for (Room room : lesson.getRooms()) {
+                   if (roomsString.length() > 0) {
+                       roomsString.append(", ");
+                   }
+                   roomsString.append(room.getRoomName());
+               }
+               tvClassroom.setText((roomsString.length() > 0 ? roomsString.toString() : "не указана"));
+               break;
+
+
+           case 2:
+               tvTeach.setText("Группы:");
+               // Жоско выводим группы(походу надо DTO модифицировать :(
+
+
+               StringBuilder roomsString1 = new StringBuilder();
+               for (Room room : lesson.getRooms()) {
+                   if (roomsString1.length() > 0) {
+                       roomsString1.append(", ");
+                   }
+                   roomsString1.append(room.getRoomName());
+               }
+               tvClassroom.setText((roomsString1.length() > 0 ? roomsString1.toString() : "не указана"));
+               break;
+
+           case 3:
+               StringBuilder teachersString1 = new StringBuilder();
+               for (Teacher teacher : lesson.getTeachers()) {
+                   if (teachersString1.length() > 0) {
+                       teachersString1.append("\n");
+                   }
+                   teachersString1.append(teacher.toString());
+               }
+               tvTeacher.setText((teachersString1.length() > 0 ? teachersString1.toString() : "не указан"));
+
+               tvRoom.setText("Группы:");
+               // Жоско выводим группы(походу надо DTO модифицировать :(
+               break;
+           default:
+               goBackToMain();
+               break;
+       }
+
+
 
         btnClose.setOnClickListener(v -> popupWindow.dismiss());
 

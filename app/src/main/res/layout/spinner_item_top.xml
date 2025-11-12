@@ -8,6 +8,6 @@
     android:fontFamily="@font/jetbrains_mono_bold"
     android:textSize="14sp"
     android:gravity="center"
-    android:textColor="?attr/whiteOnLight"
+    android:textColor="@color/white"
 
     />

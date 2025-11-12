@@ -496,7 +496,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String formatTeacherName(RawTeacher teacher) {
-        return teacher.getDegree() + " " + teacher.getName();
+        return  teacher.getName();
     }
 
     private String formatRoomName(RawRoom room) {

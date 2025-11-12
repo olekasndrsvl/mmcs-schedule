@@ -73,8 +73,7 @@ public class PreferencesManager {
 
     public int getSelectedRoomId() {return prefs.getInt(KEY_ROOM_ID,1);}
 
-    public String getSelectedRoomName() {return prefs.getString(KEY_ROOM_SELECTED,"<room>");}
-
+    public String getSelectedRoomName() {return prefs.getString(KEY_ROOM_NAME,"<room>");}
     public boolean isGroupSelected() {
         return prefs.getBoolean(KEY_GROUP_SELECTED, false);
     }

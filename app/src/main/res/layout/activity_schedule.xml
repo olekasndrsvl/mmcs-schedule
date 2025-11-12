@@ -32,8 +32,16 @@
                 android:textAlignment="center"
                 android:fontFamily="@font/jetbrains_mono_bold"
                 android:textColor="@color/white"
-                android:text="Bach 3.3" />
+                android:text="Bach 3.3"
+                android:maxWidth="100dp"
+                />
+            <!-- Вертикальная белая линия -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="15dp"
 
+                android:background="@color/white" />
             <TextView
                 android:id="@+id/CurrentWeek"
                 android:fontFamily="@font/jetbrains_mono_bold"

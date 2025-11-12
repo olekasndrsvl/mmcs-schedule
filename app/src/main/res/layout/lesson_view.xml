@@ -4,6 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:ignore="MissingConstraints">
+
+    <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -75,6 +81,12 @@
                 android:text="инфа Ауд. 301" />
 
         </LinearLayout>
-
     </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="10dp"
+            android:background="@android:color/darker_gray" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
